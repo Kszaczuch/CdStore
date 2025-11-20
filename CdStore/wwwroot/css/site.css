@@ -28,6 +28,16 @@ body {
     aspect-ratio: 1/1;
 }
 
-.text-under-square, .responsive-btn {
-    font-size: clamp(12px,1vw,30px) !important;
+.responsive-btn {
+    font-size: clamp(18px,1vw,30px) !important;
+}
+
+.product-title {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 1rem;
+    margin-bottom: .25rem;
+    max-width: 100%;
 }
