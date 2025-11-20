@@ -10,6 +10,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
     options.UseSqlServer(connectionString);
 });
+builder.Services.AddSingleton<CdStore.Services.CartService>();
 
 var app = builder.Build();
 

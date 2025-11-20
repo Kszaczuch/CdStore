@@ -1,4 +1,7 @@
-﻿@{
+﻿@model List<CdStore.Models.Album>
+@{
+    ViewData["Title"] = "Koszyk";
+    decimal total = Model?.Sum(a => a.Cena) ?? 0m;
 }
 
 <div class="text-center">
@@ -15,73 +18,102 @@
                 </tr>
             </thead>
             <tbody>
-                @* @
+                @foreach (var a in Model)
                 {
-                    foreach(var expense in Model)
-                    {
-                        <tr>
-                            <td>
-                                // @expense.Id
-                            </td>
-                            <td>
-                                // @expense.Value
-                            </td>
-                            <td>
-                                // @expense.Description
-                            </td>
-                            <td>
-                                // <a asp-action="CreateEditExpense" asp-route-id="@expense.Id">Edit</a>
-                                // <a asp-action="DeleteExpense" asp-route-id="@expense.Id">Delete</a>
-                            </td>
-                        </tr>
-                    }
-                } *@
-
-                <tr>
-                    <td class="text-start">
-                        <img class="img-fluid square-img rounded"
-                             src="https://upload.wikimedia.org/wikipedia/en/5/55/Michael_Jackson_-_Thriller.png"
-                             alt="nie działa"
-                             style="max-width: 80px; height: auto;" />
-                    </td>
-                    <td class="text-center">
-                        <p class="product-title mb-0" title="Thriller - Michael Jackson">Thriller - Michael Jackson</p>
-                    </td>
-                    <td class="text-end">
-                        <p class="mb-0">99 zł</p>
-                    </td>
-                    <td class="text-end">
-                        <a class="btn btn-sm btn-outline-danger">Usuń</a>
-                    </td>
-                </tr>
-
-                <tr>
-                    <td class="text-start">
-                        <img class="img-fluid square-img rounded"
-                             src="https://ecsmedia.pl/c/niepowstrzymany-b-iext125394762.jpg"
-                             alt="nie działa"
-                             style="max-width: 80px; height: auto;" />
-                    </td>
-                    <td class="text-center">
-                        <p class="product-title mb-0" title="Niepowstrzymany - Gimpson">Niepowstrzymany - Gimpson</p>
-                    </td>
-                    <td class="text-end">
-                        <p class="mb-0">120 zł</p>
-                    </td>
-                    <td class="text-end">
-                        <a class="btn btn-sm btn-outline-danger">Usuń</a>
-                    </td>
-                </tr>
+                    <tr>
+                        <td class="text-start">
+                            <img class="img-fluid square-img rounded"
+                                 src="@a.OkladkaLink"
+                                 alt="@a.Tytul"
+                                 style="max-width: 80px; height: auto;" />
+                        </td>
+                        <td class="text-center">@a.Tytul - @a.Artysta</td>
+                        <td class="text-end">@a.Cena.ToString("C")</td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-outline-danger remove-btn" data-id="@a.Id">Usuń</button>
+                        </td>
+                    </tr>
+                }
             </tbody>
         </table>
         <div class="d-flex flex-wrap justify-content-between align-items-center mt-3">
             <div class="mb-2 mb-md-0">
-                <h5>Całkowity koszt: <strong>219 zł</strong></h5>
+                <h5>Całkowity koszt: @total.ToString("C")</h5>
             </div>
             <div class="d-flex flex-wrap gap-2">
-                <a class="btn btn-danger">Usuń wszystko</a>
-                <a class="btn btn-success">Kup teraz</a>
+                <button id="clear-cart-btn" class="btn btn-danger">Usuń wszystko</button>
+                <button id="buy-btn" class="btn btn-success">Kup teraz</button>
             </div>
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="buyModal" tabindex="-1" aria-labelledby="buyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="buyModalLabel">Kupiono produkty</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+            </div>
+            <div class="modal-body">
+                Dziękujemy — zakup zakończony pomyślnie.
+            </div>
+            <div class="modal-footer">
+                <button id="buy-ok-btn" type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            document.addEventListener('click', function (e) {
+                const btn = e.target;
+                if (!btn) return;
+
+                if (btn.classList.contains('remove-btn')) {
+                    const id = btn.getAttribute('data-id');
+                    if (!id) return;
+
+                    fetch('/Home/RemoveFromCart?albumId=' + encodeURIComponent(id), { method: 'POST' })
+                        .then(r => r.json())
+                        .then(() => location.reload())
+                        .catch(() => alert('Wystąpił błąd przy usuwaniu produktu.'));
+                }
+            });
+
+            document.getElementById('clear-cart-btn')?.addEventListener('click', function () {
+                if (!confirm('Na pewno wyczyścić koszyk?')) return;
+                fetch('/Home/ClearCart', { method: 'POST' })
+                    .then(r => r.json())
+                    .then(() => location.reload())
+                    .catch(() => alert('Wystąpił błąd przy czyszczeniu koszyka.'));
+            });
+
+            document.getElementById('buy-btn')?.addEventListener('click', function () {
+                fetch('/Home/Buy', { method: 'POST' })
+                    .then(r => r.json())
+                    .then(j => {
+                        if (j && j.success) {
+                            const modalEl = document.getElementById('buyModal');
+                            if (typeof bootstrap !== 'undefined') {
+                                const modal = new bootstrap.Modal(modalEl);
+                                modal.show();
+
+                                document.getElementById('buy-ok-btn')?.addEventListener('click', function () {
+                                    window.location.href = '/';
+                                });
+                            } else {
+                                alert('Kupiono produkty');
+                                window.location.href = '/';
+                            }
+                        } else {
+                            alert('Nie udało się zrealizować zakupu.');
+                        }
+                    })
+                    .catch(() => alert('Wystąpił błąd przy realizacji zakupu.'));
+            });
+        })();
+    </script>
+}
