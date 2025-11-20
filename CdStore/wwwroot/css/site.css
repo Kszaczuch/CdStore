@@ -28,6 +28,11 @@ body {
     aspect-ratio: 1/1;
 }
 
+.square-img-small {
+    max-width: 100px;
+    aspect-ratio: 1/1;
+}
+
 .responsive-btn {
     font-size: clamp(18px,1vw,30px) !important;
 }
