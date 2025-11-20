@@ -3,25 +3,24 @@ html {
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 20px;
-  }
+    html {
+        font-size: 20px;
+    }
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
 html {
-  position: relative;
-  min-height: 100%;
+    position: relative;
+    min-height: 100%;
 }
 
 body {
     margin-bottom: 60px;
     background-color: #212529;
     color: white;
-    
 }
 
 .square-img {
@@ -45,4 +44,29 @@ body {
     font-size: 1rem;
     margin-bottom: .25rem;
     max-width: 100%;
+}
+
+.table-fixed {
+    table-layout: fixed;
+    width: 100%;
+}
+
+.table-fixed th, .table-fixed td {
+vertical-align: middle;
+padding-top: .5rem;
+padding-bottom: .5rem;
+overflow: hidden;
+    }
+
+table-fixed td .product-title {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media (max-width: 420px) {
+    .product-title {
+        font-size: 0.95rem;
+    }
 }
