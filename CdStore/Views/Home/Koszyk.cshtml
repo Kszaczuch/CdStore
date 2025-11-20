@@ -4,72 +4,75 @@
 <div class="text-center">
     <h3 class="display-5 fw-bold">Koszyk</h3>
     <br />
-    <table class="table text-white">
-        <thead>
-            <tr>
-                <th class="text-start"></th>
-                <th class="text-center">Nazwa</th>
-                <th class="text-end">Cena</th>
-                <th class="text-end"></th>
-            </tr>
-        </thead>
-        <tbody>
-            @* @{
-                foreach(var expense in Model)
+    <div class="table-responsive">
+        <table class="table text-white table-fixed">
+            <thead>
+                <tr>
+                    <th class="text-start" style="width:90px"></th>
+                    <th class="text-center">Nazwa</th>
+                    <th class="text-end" style="width:100px">Cena</th>
+                    <th class="text-end" style="width:100px"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @* @
                 {
-                    <tr>
-                        <td>
-                            // @expense.Id
-                        </td>
-                        <td>
-                            // @expense.Value
-                        </td>
-                        <td>
-                            // @expense.Description
-                        </td>
-                        <td>
-                            // <a asp-action="CreateEditExpense" asp-route-id="@expense.Id">Edit</a>
-                            // <a asp-action="DeleteExpense" asp-route-id="@expense.Id">Delete</a>
-                        </td>
-                    </tr>
-                }
-            } *@
+                    foreach(var expense in Model)
+                    {
+                        <tr>
+                            <td>
+                                // @expense.Id
+                            </td>
+                            <td>
+                                // @expense.Value
+                            </td>
+                            <td>
+                                // @expense.Description
+                            </td>
+                            <td>
+                                // <a asp-action="CreateEditExpense" asp-route-id="@expense.Id">Edit</a>
+                                // <a asp-action="DeleteExpense" asp-route-id="@expense.Id">Delete</a>
+                            </td>
+                        </tr>
+                    }
+                } *@
 
-            <tr>
-                <td class="text-start">
-                    <img class="img-fluid square-img rounded"
-                         src="https://upload.wikimedia.org/wikipedia/en/5/55/Michael_Jackson_-_Thriller.png"
-                         alt="nie działa"
-                         style="max-width: 80px; height: auto;" />
-                </td>
-                <td class="text-center">
-                    <p >Thriller - Michael Jackson</p>
-                </td>
-                <td class="text-end">
-                    <p>99 zł</p>
-                </td>
-                <td class="text-end">
-                    <a class="btn btn-sm btn-outline-danger">Usuń</a>
-                </td>
-            </tr>
+                <tr>
+                    <td class="text-start">
+                        <img class="img-fluid square-img rounded"
+                             src="https://upload.wikimedia.org/wikipedia/en/5/55/Michael_Jackson_-_Thriller.png"
+                             alt="nie działa"
+                             style="max-width: 80px; height: auto;" />
+                    </td>
+                    <td class="text-center">
+                        <p class="product-title mb-0" title="Thriller - Michael Jackson">Thriller - Michael Jackson</p>
+                    </td>
+                    <td class="text-end">
+                        <p class="mb-0">99 zł</p>
+                    </td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-danger">Usuń</a>
+                    </td>
+                </tr>
 
-            <tr>
-                <td class="text-start">
-                    <img class="img-fluid square-img rounded"
-                         src="https://ecsmedia.pl/c/niepowstrzymany-b-iext125394762.jpg"
-                         alt="nie działa"
-                         style="max-width: 80px; height: auto;" />
-                </td>
-                <td class="text-center">
-                    <p>Niepowstrzymany - Gimpson</p>
-                </td>
-                <td class="text-end">
-                    <p>120 zł</p>
-                </td>
-                <td class="text-end">
-                    <a class="btn btn-sm btn-outline-danger">Usuń</a>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+                <tr>
+                    <td class="text-start">
+                        <img class="img-fluid square-img rounded"
+                             src="https://ecsmedia.pl/c/niepowstrzymany-b-iext125394762.jpg"
+                             alt="nie działa"
+                             style="max-width: 80px; height: auto;" />
+                    </td>
+                    <td class="text-center">
+                        <p class="product-title mb-0" title="Niepowstrzymany - Gimpson">Niepowstrzymany - Gimpson</p>
+                    </td>
+                    <td class="text-end">
+                        <p class="mb-0">120 zł</p>
+                    </td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-danger">Usuń</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
