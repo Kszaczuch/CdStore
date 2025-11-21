@@ -1,5 +1,7 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model IEnumerable<CdStore.Models.Album>
+@{
+    ViewData["Title"] = "Home";
+    var cartIds = (ViewBag.CartIds as List<int>) ?? new List<int>();
 }
 
 <div class="text-center">
@@ -8,20 +10,93 @@
 
     <div class="container text-center text-under-square">
         <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
-            <div class="col"><img class="img-fluid square-img rounded" src="https://upload.wikimedia.org/wikipedia/en/5/55/Michael_Jackson_-_Thriller.png" alt="nie działa" /> <p class="product-title">Thriller - Michael Jackson</p> <p>Cena: </p>  <a class="btn btn-outline-info responsive-btn">Dodaj do koszyka</a></div>
-            <div class="col"><img class="img-fluid square-img rounded" src="https://ecsmedia.pl/c/niepowstrzymany-b-iext125394762.jpg" alt="Alternate Text" /> <p class="product-title">Niepowstrzymany - Gimpson</p> <p>Cena: </p>  <a class="btn btn-outline-info responsive-btn">Dodaj do koszyka</a></div>
-            <div class="col"><img class="img-fluid square-img rounded" src="https://m.media-amazon.com/images/I/81fpG8LkWkL.jpg" alt="Alternate Text" /> <p class="product-title">Scorpion - Drake</p> <p>Cena: </p>  <a class="btn btn-outline-info responsive-btn">Dodaj do koszyka</a></div>
-            <div class="col"><img class="img-fluid square-img rounded" src="https://ecsmedia.pl/c/utopia-b-iext202871715.jpg" alt="Alternate Text" /> <p class="product-title">Utopia - Travis Scott</p> <p>Cena: </p>  <a class="btn btn-outline-info responsive-btn">Dodaj do koszyka</a></div>
-
-            <div class="col"><img class="img-fluid square-img rounded" src="https://www.emp-shop.pl/dw/image/v2/BBQV_PRD/on/demandware.static/-/Sites-master-emp/default/dw42eb8778/images/3/3/2/1/332112-emp.jpg?sw=1000&sh=800&sm=fit&sfrm=png" alt="nie działa" /> <p class="product-title">Ride the Lightning - Metallica</p> <p>Cena: </p>  <a class="btn btn-outline-info responsive-btn">Dodaj do koszyka</a></div>
-            <div class="col"><img class="img-fluid square-img rounded" src="https://ecsmedia.pl/c/life-of-a-don-b-iext125835440.jpg" alt="Alternate Text" /> <p class="product-title">Life of a don - Don Toliver</p> <p>Cena: </p>  <a class="btn btn-outline-info responsive-btn">Dodaj do koszyka</a></div>
-            <div class="col"><img class="img-fluid square-img rounded" src="https://www.slugmag.com/wp/wp-content/uploads/2024/09/LTGZDQ-1724699022-1500x1500-1724699013-Untitled-design-1.jpg.webp" alt="Alternate Text" /> <p class="product-title">Short N' Sweet - Sabrina Carpenter</p> <p>Cena: </p>  <a class="btn btn-outline-info responsive-btn">Dodaj do koszyka</a></div>
-            <div class="col"><img class="img-fluid square-img rounded" src="https://cdn-images.dzcdn.net/images/cover/8c6578a2099561992fb7544e6826f767/0x1900-000000-80-0-0.jpg" alt="Alternate Text" /> <p class="product-title">Graduation - Kanye West</p> <p>Cena: </p>  <a class="btn btn-outline-info responsive-btn">Dodaj do koszyka</a></div>
-
-            <div class="col"><img class="img-fluid square-img rounded" src="https://m.media-amazon.com/images/I/81OJxs2RJVL.jpg" alt="nie działa" /> <p class="product-title">Highway to Hell - AC/DC</p> <p>Cena: </p>  <a class="btn btn-outline-info responsive-btn">Dodaj do koszyka</a></div>
-            <div class="col"><img class="img-fluid square-img rounded" src="https://m.media-amazon.com/images/I/71o7oddTy8L._UF350,350_QL50_.jpg" alt="Alternate Text" />  <p class="product-title">Playboi Carti - Playboi Carti</p> <p>Cena: </p>  <a class="btn btn-outline-info responsive-btn">Dodaj do koszyka</a></div>
-            <div class="col"><img class="img-fluid square-img rounded" src="https://m.media-amazon.com/images/I/81sBKBIcwvL._UF894,1000_QL80_.jpg" alt="Alternate Text" /> <p class="product-title">Abbey Road - The Beatles</p> <p>Cena: </p>  <a class="btn btn-outline-info responsive-btn">Dodaj do koszyka</a></div>
-            <div class="col"><img class="img-fluid square-img rounded" src="https://ecsmedia.pl/c/hot-space-deluxe-edition-w-iext197815873.jpg" alt="Alternate Text" /> <p class="product-title">Hot Space (Deluxe) - Queen</p> <p>Cena: </p>  <a class="btn btn-outline-info responsive-btn">Dodaj do koszyka</a></div>
+            @foreach (var album in Model)
+            {
+                var inCart = cartIds.Contains(album.Id);
+                <div class="col">
+                    <img class="img-fluid square-img rounded" src="@album.OkladkaLink" alt="@album.Tytul" />
+                    <p class="product-title">@album.Tytul - @album.Artysta</p>
+                    <div><strong>@album.Cena.ToString("C")</strong></div>
+                    <button class="btn @(inCart ? "btn-success" : "btn-outline-info") responsive-btn btn-cart" data-id="@album.Id" data-in-cart="@(inCart ? "1" : "0")" style="margin-top:8px;">
+                        @(inCart ? "W koszyku" : "Dodaj do koszyka")
+                    </button>
+                </div>
+            }
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="cartModal" tabindex="-1" aria-labelledby="cartModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cartModalLabel">Dodano do koszyka</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+            </div>
+            <div class="modal-body">
+                Produkt został dodany do koszyka.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="continue-shopping">Kupuj dalej</button>
+                <button type="button" class="btn btn-primary" id="go-to-cart">Przejdź do koszyka</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            const preselected = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(cartIds ?? new List<int>()));
+
+            if (Array.isArray(preselected)) {
+                preselected.forEach(id => {
+                    const btn = document.querySelector('.btn-cart[data-id="' + id + '"]');
+                    if (btn) {
+                        btn.textContent = 'W koszyku';
+                        btn.classList.remove('btn-outline-info');
+                        btn.classList.add('btn-success');
+                        btn.dataset.inCart = '1';
+                    }
+                });
+            }
+
+            document.addEventListener('click', function (e) {
+                const target = e.target;
+                if (!target) return;
+
+                if (target.classList.contains('btn-cart')) {
+                    const id = target.getAttribute('data-id');
+                    if (!id) return;
+                    if (target.getAttribute('data-in-cart') === '1') return;
+
+                    fetch('/Home/AddToCart?albumId=' + encodeURIComponent(id), { method: 'POST' })
+                        .then(r => r.json())
+                        .then(j => {
+                            if (j && j.success) {
+                                target.textContent = 'W koszyku';
+                                target.classList.remove('btn-outline-info');
+                                target.classList.add('btn-success');
+                                target.setAttribute('data-in-cart', '1');
+
+                                const modalEl = document.getElementById('cartModal');
+                                if (typeof bootstrap !== 'undefined') {
+                                    const modal = new bootstrap.Modal(modalEl);
+                                    modal.show();
+                                } else {
+                                    alert('Dodano do koszyka');
+                                }
+                            } else {
+                                alert('Produkt już w koszyku lub wystąpił błąd.');
+                            }
+                        })
+                        .catch(() => alert('Wystąpił błąd podczas dodawania do koszyka.'));
+                }
+            });
+
+            document.getElementById('go-to-cart')?.addEventListener('click', function () {
+                window.location.href = '/Home/Koszyk';
+            });
+        })();
+    </script>
+}

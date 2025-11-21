@@ -51,22 +51,47 @@ body {
     width: 100%;
 }
 
-.table-fixed th, .table-fixed td {
-vertical-align: middle;
-padding-top: .5rem;
-padding-bottom: .5rem;
-overflow: hidden;
+    .table-fixed td {
+        vertical-align: middle;
+        padding-top: .5rem;
+        padding-bottom: .5rem;
+        overflow: hidden;
     }
 
-table-fixed td .product-title {
-    display: block;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
+
+    .table-fixed th {
+        vertical-align: middle;
+        padding-top: .5rem;
+        padding-bottom: .5rem;
+        overflow: visible;
+    }
+
+    .table-fixed td .product-title {
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 
 @media (max-width: 420px) {
     .product-title {
         font-size: 0.95rem;
     }
 }
+
+.modal .modal-content {
+    color: #ffffff;
+    background-color: #212529;
+}
+
+.modal .btn {
+    color: #212529 !important;
+}
+
+    .modal .btn.btn-primary {
+        color: #fff !important;
+    }
+
+    .modal .btn.btn-secondary {
+        color: #fff !important;
+    }
