@@ -7,12 +7,12 @@ namespace CdStore.ViewModels
         [Required(ErrorMessage = "Email jest wymagany")]
         [EmailAddress]  
 
-        public string email { get; set; }
+        public string Email { get; set; }
 
         [Required(ErrorMessage = "Hasło jest wymagane")]
         [DataType(DataType.Password)]
         
-        public string password { get; set; }
+        public string Password { get; set; }
 
         [Display(Name = "Zapamiętaj mnie?")]
 
