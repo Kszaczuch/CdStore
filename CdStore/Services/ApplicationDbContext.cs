@@ -11,5 +11,6 @@ namespace CdStore.Services
         }
 
         public DbSet<Album> Albumy { get; set; } = null!;
+        public DbSet<CartItem> CartItems { get; set; } = null!;
     }
 }

@@ -1,17 +1,49 @@
-﻿.account-container{
+﻿.account-container {
     display: flex;
-    justify-content:center;
+    justify-content: center;
     align-items: center;
     padding: 2rem 0;
-
+    min-height: calc(100vh - 60px);
 }
 
-.account-box{
-    background-color: white;
-    padding:30px;
-    border-radius:10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.3);
-    max-width:500px;
-    width:100%;
-    opacity:.9;
+.account-box {
+    background-color: #212529;
+    color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
+    max-width: 500px;
+    width: 100%;
+    opacity: 0.98;
+    border: 1px solid rgba(255,255,255,0.04);
+}
+
+@media (max-width: 576px) {
+    .account-container {
+        display: block;
+        padding: 1rem;
+        min-height: auto;
+    }
+
+    .account-box {
+        display: contents;
+    }
+
+    .account-container .form-control {
+        background-color: #212529;
+        color: #ffffff;
+        border: 1px solid rgba(255,255,255,0.08);
+        box-shadow: none;
+    }
+
+    .account-container .account-box > h2,
+    .account-container h2 {
+        margin-top: 0;
+        margin-bottom: .5rem;
+        color: #fff;
+    }
+
+    .account-container .btn {
+        border-radius: 6px;
+    }
 }

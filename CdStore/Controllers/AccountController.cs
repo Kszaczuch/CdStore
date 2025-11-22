@@ -1,4 +1,5 @@
 ﻿using CdStore.Models;
+using CdStore.Services;
 using CdStore.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -10,12 +11,15 @@ namespace CdStore.Controllers
         private readonly SignInManager<Users> signInManager;
         private readonly UserManager<Users> userManager;
         private readonly RoleManager<IdentityRole> roleManager;
+        private readonly CartService _cartService;
+        private const string CartCookieName = "CartId";
 
-        public AccountController(SignInManager<Users> signInManager, UserManager<Users> userManager, RoleManager<IdentityRole> roleManager)
+        public AccountController(SignInManager<Users> signInManager, UserManager<Users> userManager, RoleManager<IdentityRole> roleManager, CartService cartService)
         {
             this.signInManager = signInManager;
             this.userManager = userManager;
             this.roleManager = roleManager;
+            this._cartService = cartService;
         }
 
         [HttpGet]
@@ -33,10 +37,22 @@ namespace CdStore.Controllers
                 return View(model);
             }
 
-            var result = await signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
+            var user = await userManager.FindByEmailAsync(model.Email);
+
+            var result = await signInManager.PasswordSignInAsync(model.Email, model.Password, isPersistent: false, lockoutOnFailure: false);
 
             if (result.Succeeded)
             {
+                if (user != null && Request.Cookies.TryGetValue(CartCookieName, out var cookieId) && !string.IsNullOrEmpty(cookieId))
+                {
+                    var anonItems = _cartService.GetCartItems(cookieId);
+                    foreach (var albumId in anonItems)
+                    {
+                        _cartService.Add(user.Id, albumId);
+                    }
+                    _cartService.Clear(cookieId);
+                    Response.Cookies.Delete(CartCookieName);
+                }
                 return RedirectToAction("Index", "Home");
             }
 
@@ -84,6 +100,18 @@ namespace CdStore.Controllers
                 await userManager.AddToRoleAsync(user, "User");
 
                 await signInManager.SignInAsync(user, isPersistent: false);
+
+                if (Request.Cookies.TryGetValue(CartCookieName, out var cookieId) && !string.IsNullOrEmpty(cookieId))
+                {
+                    var anonItems = _cartService.GetCartItems(cookieId);
+                    foreach (var albumId in anonItems)
+                    {
+                        _cartService.Add(user.Id, albumId);
+                    }
+                    _cartService.Clear(cookieId);
+                    Response.Cookies.Delete(CartCookieName);
+                }
+
                 return RedirectToAction("Login", "Account");
             }
 
