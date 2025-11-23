@@ -1,6 +1,76 @@
-﻿@{
-    ViewData["Title"] = "Privacy Policy";
+﻿@model List<CdStore.Models.Album>
+@{
+    ViewData["Title"] = "Zarządzanie produktów";
+    var sel = ViewBag.SelectedAlbum as CdStore.Models.Album;
 }
-<h1>@ViewData["Title"]</h1>
+<h1 class="mb-4">@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<div class="card bg-dark text-white mb-4">
+    <div class="card-body">
+        <form asp-action="SaveProductForm" method="post" class="row g-2 align-items-center">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="Id" value="@(sel != null ? sel.Id.ToString() : "")" />
+
+            <div class="col-md-4">
+                <input name="OkladkaLink" class="form-control text-white bg-dark" placeholder="Link do zdjęcia (OkladkaLink)" value="@(sel?.OkladkaLink ?? "")" />
+            </div>
+            <div class="col-md-3">
+                <input name="Tytul" class="form-control text-white bg-dark" placeholder="Nazwa (Tytul)" value="@(sel?.Tytul ?? "")" />
+            </div>
+            <div class="col-md-3">
+                <input name="Artysta" class="form-control text-white bg-dark" placeholder="Wykonawca (Artysta)" value="@(sel?.Artysta ?? "")" />
+            </div>
+            <div class="col-md-1">
+                <input name="Cena" type="number" step="0.01" class="form-control text-white bg-dark" placeholder="Cena" value="@(sel != null ? sel.Cena.ToString("F2") : "")" />
+            </div>
+            <div class="col-md-1 d-grid">
+                <button type="submit" class="btn btn-outline-success">Zapisz</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-dark table-striped align-middle">
+        <thead>
+            <tr>
+                <th style="width:90px"></th>
+                <th>Nazwa - Wykonawca</th>
+                <th style="width:120px" class="text-end">Cena</th>
+                <th style="width:160px" class="text-end"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Count > 0)
+            {
+                foreach (var a in Model)
+                {
+                    <tr>
+                        <td class="text-start">
+                            <img class="img-fluid rounded" src="@a.OkladkaLink" alt="@a.Tytul" style="max-width:80px" />
+                        </td>
+                        <td>@a.Tytul - @a.Artysta</td>
+                        <td class="text-end">@a.Cena.ToString("C")</td>
+                        <td class="text-end" style="white-space:nowrap;">
+                            <div class="d-inline-flex gap-2 align-items-center">
+                                <a class="btn btn-sm btn-outline-info" href="@Url.Action("Privacy", new { id = a.Id })">Edytuj</a>
+
+                                <form asp-action="DeleteProductForm" method="post" class="m-0 p-0">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@a.Id" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Na pewno usunąć produkt?');">Usuń</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="4">Brak produktów.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

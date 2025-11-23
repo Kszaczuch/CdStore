@@ -49,11 +49,58 @@ namespace CdStore.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        public IActionResult Privacy()
+        public IActionResult Privacy(int? id)
         {
-            return View();
+            var albumy = _context.Albumy.ToList();
+            if (id.HasValue)
+            {
+                var selected = _context.Albumy.Find(id.Value);
+                ViewBag.SelectedAlbum = selected;
+            }
+            return View(albumy);
         }
 
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult SaveProductForm(Album model)
+        {
+            if (model == null) return RedirectToAction("Privacy");
+
+            if (model.Id == 0)
+            {
+                _context.Albumy.Add(model);
+            }
+            else
+            {
+                var existing = _context.Albumy.Find(model.Id);
+                if (existing != null)
+                {
+                    existing.Tytul = model.Tytul;
+                    existing.Artysta = model.Artysta;
+                    existing.Cena = model.Cena;
+                    existing.OkladkaLink = model.OkladkaLink;
+                    _context.Albumy.Update(existing);
+                }
+            }
+
+            _context.SaveChanges();
+            return RedirectToAction("Privacy");
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteProductForm(int id)
+        {
+            var album = _context.Albumy.Find(id);
+            if (album != null)
+            {
+                _context.Albumy.Remove(album);
+                _context.SaveChanges();
+            }
+            return RedirectToAction("Privacy");
+        }
         public IActionResult Koszyk()
         {
             var cartId = GetOrCreateCartId();
