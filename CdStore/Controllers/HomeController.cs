@@ -1,11 +1,14 @@
-using System.Diagnostics;
 using CdStore.Models;
 using CdStore.Services;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
+using System.Security.Claims;
 
 namespace CdStore.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -22,6 +25,13 @@ namespace CdStore.Controllers
 
         private string GetOrCreateCartId()
         {
+            if (User?.Identity?.IsAuthenticated == true)
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (!string.IsNullOrEmpty(userId))
+                    return userId;
+            }
+
             if (Request.Cookies.TryGetValue(CartCookieName, out var id) && !string.IsNullOrEmpty(id))
                 return id;
             var newId = Guid.NewGuid().ToString();
@@ -38,11 +48,59 @@ namespace CdStore.Controllers
             return View(albumy);
         }
 
-        public IActionResult Privacy()
+        [Authorize(Roles = "Admin")]
+        public IActionResult Privacy(int? id)
         {
-            return View();
+            var albumy = _context.Albumy.ToList();
+            if (id.HasValue)
+            {
+                var selected = _context.Albumy.Find(id.Value);
+                ViewBag.SelectedAlbum = selected;
+            }
+            return View(albumy);
         }
 
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult SaveProductForm(Album model)
+        {
+            if (model == null) return RedirectToAction("Privacy");
+
+            if (model.Id == 0)
+            {
+                _context.Albumy.Add(model);
+            }
+            else
+            {
+                var existing = _context.Albumy.Find(model.Id);
+                if (existing != null)
+                {
+                    existing.Tytul = model.Tytul;
+                    existing.Artysta = model.Artysta;
+                    existing.Cena = model.Cena;
+                    existing.OkladkaLink = model.OkladkaLink;
+                    _context.Albumy.Update(existing);
+                }
+            }
+
+            _context.SaveChanges();
+            return RedirectToAction("Privacy");
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteProductForm(int id)
+        {
+            var album = _context.Albumy.Find(id);
+            if (album != null)
+            {
+                _context.Albumy.Remove(album);
+                _context.SaveChanges();
+            }
+            return RedirectToAction("Privacy");
+        }
         public IActionResult Koszyk()
         {
             var cartId = GetOrCreateCartId();

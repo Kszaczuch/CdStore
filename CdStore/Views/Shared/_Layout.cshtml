@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<CdStore.Models.Users> signInManager
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -27,9 +30,12 @@
                         <li class="nav-item">
                             <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Index">Strona główna</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
+                        @if (signInManager.IsSignedIn(User) && User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Privacy">Zarządzanie</a>
+                            </li>
+                        }
                     </ul>
 
                     <ul class="navbar-nav d-flex align-items-center">
@@ -39,6 +45,7 @@
                                 <i class="bi bi-basket2" style="font-size: 1.5rem;"></i>
                             </a>
                         </li>
+                        <partial name="_LoginPartial" />
                     </ul>
                 </div>
             </div>
@@ -53,7 +60,7 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2025 - CdStore - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2025 - Muzyczni.pl
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
