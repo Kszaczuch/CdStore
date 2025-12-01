@@ -39,6 +39,7 @@ namespace CdStore.Controllers
             return newId;
         }
 
+        [AllowAnonymous]
         public IActionResult Index()
         {
             var albumy = _context.Albumy.ToList();

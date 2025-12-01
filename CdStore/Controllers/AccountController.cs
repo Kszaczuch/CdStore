@@ -1,8 +1,11 @@
 ﻿using CdStore.Models;
 using CdStore.Services;
 using CdStore.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
+
 
 namespace CdStore.Controllers
 {
@@ -128,6 +131,41 @@ namespace CdStore.Controllers
         {
             await signInManager.SignOutAsync();
             return RedirectToAction("Index", "Home");
+        }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> Profile()
+        {
+            var user = await userManager.GetUserAsync(User);
+            return View(user);
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Profile(Users model)
+        {
+            var user = await userManager.GetUserAsync(User);
+
+            user.FullName = model.FullName;
+            user.Email = model.Email;
+            user.UserName = model.Email;
+            user.NormalizedEmail = model.Email.ToUpper();
+            user.NormalizedUserName = model.Email.ToUpper();
+
+            var result = await userManager.UpdateAsync(user);
+
+            if (result.Succeeded)
+            {
+                ViewBag.Message = "Dane zapisano!";
+                return View(user);
+            }
+
+            foreach (var err in result.Errors)
+                ModelState.AddModelError("", err.Description);
+
+            return View(model);
         }
     }
 }
