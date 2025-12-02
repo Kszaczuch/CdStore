@@ -65,8 +65,12 @@
     </div>
 
     <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - Muzyczni.pl
+        <div class="container d-flex flex-column flex-md-row justify-content-between align-items-center py-2">
+            <div>&copy; 2025 - Muzyczni.pl</div>
+            <div class="mt-2 mt-md-0">
+                <a class="btn-link me-3" asp-controller="Home" asp-action="Regulamin">Regulamin</a>
+                <a class="btn-link" asp-controller="Home" asp-action="PolitykaPrywatnosci">Polityka prywatności</a>
+            </div>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

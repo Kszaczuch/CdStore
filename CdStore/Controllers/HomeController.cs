@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
+using System.Globalization;
 using System.Security.Claims;
 
 namespace CdStore.Controllers
@@ -49,6 +50,29 @@ namespace CdStore.Controllers
             return View(albumy);
         }
 
+        [AllowAnonymous]
+        public IActionResult Detale(int id)
+        {
+            var album = _context.Albumy.Find(id);
+            if (album == null) return NotFound();
+            var cartId = GetOrCreateCartId();
+            var cartItems = _cartService.GetCartItems(cartId);
+            ViewBag.CartIds = cartItems;
+            return View(album);
+        }
+
+        [AllowAnonymous]
+        public IActionResult Regulamin()
+        {
+            return View();
+        }
+
+        [AllowAnonymous]
+        public IActionResult PolitykaPrywatnosci()
+        {
+            return View();
+        }
+
         [Authorize(Roles = "Admin")]
         public IActionResult Privacy(int? id)
         {
@@ -67,6 +91,21 @@ namespace CdStore.Controllers
         public IActionResult SaveProductForm(Album model)
         {
             if (model == null) return RedirectToAction("Privacy");
+            if (!string.IsNullOrEmpty(model.Opis))
+            {
+                model.Opis = model.Opis.Replace("\r\n", "\n");
+            }
+
+            decimal parsedCena = model.Cena;
+            var cenaStr = Request.Form["Cena"].ToString();
+            if (!string.IsNullOrWhiteSpace(cenaStr))
+            {
+                if (!decimal.TryParse(cenaStr, NumberStyles.Number, CultureInfo.InvariantCulture, out parsedCena))
+                {
+                    decimal.TryParse(cenaStr, NumberStyles.Number, CultureInfo.CurrentCulture, out parsedCena);
+                }
+            }
+            model.Cena = parsedCena;
 
             if (model.Id == 0)
             {
@@ -81,6 +120,8 @@ namespace CdStore.Controllers
                     existing.Artysta = model.Artysta;
                     existing.Cena = model.Cena;
                     existing.OkladkaLink = model.OkladkaLink;
+                    existing.Opis = model.Opis;
+                    existing.IloscNaStanie = model.IloscNaStanie;
                     _context.Albumy.Update(existing);
                 }
             }
@@ -135,10 +176,32 @@ namespace CdStore.Controllers
         }
 
         [HttpPost]
+        [HttpPost]
         public IActionResult Buy()
         {
             var cartId = GetOrCreateCartId();
-            _cartService?.Clear(cartId);
+            var ids = _cartService.GetCartItems(cartId);
+            if (ids == null || !ids.Any())
+                return Json(new { success = false, message = "Koszyk jest pusty." });
+
+            var albumy = _context.Albumy.Where(a => ids.Contains(a.Id)).ToList();
+            var outOfStock = albumy.Where(a => a.IloscNaStanie <= 0).ToList();
+
+            if (outOfStock.Any())
+            {
+                var names = outOfStock.Select(a => $"{a.Tytul} - {a.Artysta}");
+                return Json(new { success = false, message = "Brak dostêpnoœci: " + string.Join(", ", names) });
+            }
+
+            foreach (var a in albumy)
+            {
+                if (a.IloscNaStanie > 0)
+                    a.IloscNaStanie--;
+            }
+
+            _context.SaveChanges();
+
+            _cartService.Clear(cartId);
             return Json(new { success = true });
         }
 

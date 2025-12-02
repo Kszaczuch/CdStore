@@ -2,6 +2,7 @@
 @{
     ViewData["Title"] = "Koszyk";
     decimal total = Model?.Sum(a => a.Cena) ?? 0m;
+    var isEmpty = Model == null || !Model.Any();
 }
 
 <div class="text-center">
@@ -41,8 +42,19 @@
                 <h5>Całkowity koszt: @total.ToString("C")</h5>
             </div>
             <div class="d-flex flex-wrap gap-2">
-                <button id="clear-cart-btn" class="btn btn-danger">Usuń wszystko</button>
-                <button id="buy-btn" class="btn btn-success">Kup teraz</button>
+                <button id="clear-cart-btn"
+                        class="btn @(isEmpty ? "btn-secondary" : "btn-danger")"
+                        @(isEmpty ? "disabled" : "")
+                        aria-disabled="@(isEmpty.ToString().ToLower())">
+                    Usuń wszystko
+                </button>
+
+                <button id="buy-btn"
+                        class="btn @(isEmpty ? "btn-secondary" : "btn-success")"
+                        @(isEmpty ? "disabled" : "")
+                        aria-disabled="@(isEmpty.ToString().ToLower())">
+                    Kup teraz
+                </button>
             </div>
         </div>
     </div>

@@ -1,0 +1,104 @@
+﻿@using System.Net
+@model CdStore.Models.Album
+@{
+    ViewData["Title"] = Model?.Tytul ?? "Szczegóły";
+    var cartIds = (ViewBag.CartIds as List<int>) ?? new List<int>();
+    var inCart = Model != null && cartIds.Contains(Model.Id);
+    var available = Model != null && Model.IloscNaStanie > 0;
+}
+
+<div class="container py-4">
+    <div class="row g-4 align-items-stretch">
+        <div class="col-12 col-md-5 text-center">
+            <img src="@Model.OkladkaLink" alt="@Model.Tytul" class="rounded product-image" />
+        </div>
+
+        <div class="col-12 col-md-7 d-flex flex-column text-md-end">
+            <div>
+                <h1 class="display-6">@Model.Tytul</h1>
+                <h4 class="text-muted mt-1">@Model.Artysta</h4>
+            </div>
+
+            <div class="mt-3 mb-4 mt-auto">
+
+                <div class="mt-3 mb-3">
+                    <span class="fs-4 fw-bold">@Model.Cena.ToString("C")</span>
+                </div>
+
+                <div class="mt-3 mb-3">
+                    <span class="fs-4 text-muted">@Model.IloscNaStanie.ToString() na stanie</span>
+                </div>
+
+                @if (!available)
+                {
+                    <button class="btn btn-secondary btn-lg" disabled>Brak na stanie</button>
+                }
+                else
+                {
+                    @if (!(User?.Identity?.IsAuthenticated == true))
+                    {
+                        <a href="@(Url.Action("Login", "Account"))" class="btn @(inCart ? "btn-success" : "btn-outline-info") btn-lg">
+                            @(inCart ? "W koszyku" : "Dodaj do koszyka")
+                        </a>
+                    }
+                    else
+                    {
+                        <button class="btn @(inCart ? "btn-success" : "btn-outline-info") btn-lg btn-cart" data-id="@Model.Id" data-in-cart="@(inCart ? "1" : "0")">
+                            @(inCart ? "W koszyku" : "Dodaj do koszyka")
+                        </button>
+                    }
+                }
+                <a href="@(Url.Action("Index", "Home"))" class="btn btn-outline-secondary btn-lg ms-2">Powrót do listy</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="mx-auto" style="max-width:900px;">
+                <div class="p-3 border rounded bg-dark text-white">
+                    <h5>Opis</h5>
+                    @if (string.IsNullOrWhiteSpace(Model.Opis))
+                    {
+                        <p class="text-center">Brak opisu.</p>
+                    }
+                    else
+                    {
+                        <p class="text-center">@Html.Raw(WebUtility.HtmlEncode(Model.Opis).Replace("\n", "<br/>"))</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            document.addEventListener('click', function (e) {
+                const target = e.target;
+                if (!target) return;
+
+                if (target.classList.contains('btn-cart')) {
+                    const id = target.getAttribute('data-id');
+                    if (!id) return;
+                    if (target.getAttribute('data-in-cart') === '1') return;
+
+                    fetch('/Home/AddToCart?albumId=' + encodeURIComponent(id), { method: 'POST' })
+                        .then(r => r.json())
+                        .then(j => {
+                            if (j && j.success) {
+                                target.textContent = 'W koszyku';
+                                target.classList.remove('btn-outline-info');
+                                target.classList.add('btn-success');
+                                target.setAttribute('data-in-cart', '1');
+                            } else {
+                                alert('Produkt już w koszyku lub wystąpił błąd.');
+                            }
+                        })
+                        .catch(() => alert('Wystąpił błąd podczas dodawania do koszyka.'));
+                }
+            });
+        })();
+    </script>
+}
