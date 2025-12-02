@@ -3,6 +3,7 @@ using CdStore.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using System.Globalization;
 using System.Security.Claims;
@@ -41,12 +42,53 @@ namespace CdStore.Controllers
         }
 
         [AllowAnonymous]
-        public IActionResult Index()
+        public IActionResult Index(bool? availableOnly, int? categoryId, string sort, string q)
         {
-            var albumy = _context.Albumy.ToList();
+            var query = _context.Albumy.AsQueryable();
+
+            if (availableOnly == true)
+            {
+                query = query.Where(a => a.IloscNaStanie > 0);
+            }
+
+            if (categoryId.HasValue)
+            {
+                query = query.Where(a => a.KategoriaId == categoryId.Value);
+            }
+
+            if (!string.IsNullOrWhiteSpace(q))
+            {
+                var qLower = q.Trim();
+                query = query.Where(a => EF.Functions.Like(a.Tytul, $"%{qLower}%") || EF.Functions.Like(a.Artysta, $"%{qLower}%"));
+            }
+
+            switch (sort)
+            {
+                case "price_asc":
+                    query = query.OrderBy(a => a.Cena);
+                    break;
+                case "price_desc":
+                    query = query.OrderByDescending(a => a.Cena);
+                    break;
+                default:
+                    query = query.OrderBy(a => a.Id);
+                    break;
+            }
+
+            var albumy = query.ToList();
+
+            var categories = _context.Kategorie.OrderBy(k => k.Nazwa).ToList();
+
+            ViewBag.Categories = categories;
+            ViewBag.SelectedCategory = categoryId;
+            ViewBag.AvailableOnly = availableOnly == true;
+            ViewBag.Sort = sort ?? string.Empty;
+            ViewBag.Query = q ?? string.Empty;
+
             var cartId = GetOrCreateCartId();
             var cartItems = _cartService.GetCartItems(cartId);
             ViewBag.CartIds = cartItems;
+
             return View(albumy);
         }
 
@@ -174,8 +216,6 @@ namespace CdStore.Controllers
             _cartService.Clear(cartId);
             return Json(new { success = true });
         }
-
-        [HttpPost]
         [HttpPost]
         public IActionResult Buy()
         {

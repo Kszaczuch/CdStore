@@ -1,12 +1,74 @@
 ﻿@model IEnumerable<CdStore.Models.Album>
+@using CdStore.Models
 @{
     ViewData["Title"] = "Home";
+
     var cartIds = (ViewBag.CartIds as List<int>) ?? new List<int>();
+    var categories = (ViewBag.Categories as List<Kategoria>) ?? new List<Kategoria>();
+
+    int? selectedCategory = null;
+    if (ViewBag.SelectedCategory != null)
+    {
+
+        selectedCategory = (int)ViewBag.SelectedCategory;
+    }
+
+    bool availableOnly = false;
+    if (ViewBag.AvailableOnly != null)
+    {
+        availableOnly = (bool)ViewBag.AvailableOnly;
+    }
+
+    var currentSort = ViewBag.Sort as string ?? string.Empty;
+    var currentQuery = ViewBag.Query as string ?? string.Empty;
+
+    var isAuthenticated = User?.Identity?.IsAuthenticated == true;
+    var loginUrl = Url.Action("Login", "Account");
 }
 
 <div class="text-center">
     <h3 class="display-5 fw-bold">Nasza oferta muzyczna</h3>
     <br />
+
+    <form method="get" class="row g-2 align-items-end mb-4">
+        <div class="col-auto">
+            <label class="form-label" for="q">Szukaj</label>
+            <input id="q" name="q" value="@currentQuery" class="form-control" placeholder="Tytuł lub wykonawca" />
+        </div>
+
+        <div class="col-auto">
+            <label class="form-label" for="categoryId">Kategoria</label>
+            <select id="categoryId" name="categoryId" class="form-select">
+                <option value="">Wszystkie</option>
+                @foreach (var cat in categories)
+                {
+                    <option value="@cat.Id" @(selectedCategory == cat.Id ? "selected" : "")>@cat.Nazwa</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-auto">
+            <label class="form-label d-block" for="availableOnly">Dostępne</label>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="availableOnly" name="availableOnly" value="1" @(availableOnly ? "checked" : "") />
+                <label class="form-check-label" for="availableOnly">Pokaż tylko dostępne</label>
+            </div>
+        </div>
+
+        <div class="col-auto">
+            <label class="form-label" for="sort">Sortuj</label>
+            <select id="sort" name="sort" class="form-select">
+                <option value="">Domyślnie</option>
+                <option value="price_asc" @(currentSort == "price_asc" ? "selected" : "")>Cena rosnąco</option>
+                <option value="price_desc" @(currentSort == "price_desc" ? "selected" : "")>Cena malejąco</option>
+            </select>
+        </div>
+
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Zastosuj</button>
+            <a class="btn btn-secondary" href='@Url.Action("Index", "Home")'>Wyczyść</a>
+        </div>
+    </form>
 
     <div class="container text-center text-under-square">
         <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
@@ -25,9 +87,9 @@
                         }
                         else
                         {
-                            if (!(User?.Identity?.IsAuthenticated == true))
+                            if (!isAuthenticated)
                             {
-                                <a href="@(Url.Action("Login", "Account"))" class="btn @(inCart ? "btn-success" : "btn-outline-info") mb-2">
+                                <a href="@loginUrl" class="btn @(inCart ? "btn-success" : "btn-outline-info") mb-2">
                                     @(inCart ? "W koszyku" : "Dodaj do koszyka")
                                 </a>
                             }
@@ -38,7 +100,7 @@
                                 </button>
                             }
                         }
-                        <a href="@(Url.Action("Detale", "Home", new { id = album.Id }))" class="btn btn-outline-secondary mb-2">Szczegóły</a>
+                        <a href='@Url.Action("Detale", "Home", new { id = album.Id })' class="btn btn-outline-secondary mb-2">Szczegóły</a>
                     </div>
                 </div>
             }
