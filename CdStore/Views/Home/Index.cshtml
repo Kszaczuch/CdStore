@@ -2,11 +2,52 @@
 @{
     ViewData["Title"] = "Home";
     var cartIds = (ViewBag.CartIds as List<int>) ?? new List<int>();
+    var categories = ViewBag.Categories as List<CdStore.Models.Kategoria> ?? new List<CdStore.Models.Kategoria>();
+    var selCat = ViewBag.SelectedCategoryId as int?;
+    var selAv = (ViewBag.SelectedAvailability as string) ?? "all";
+    var selSort = (ViewBag.SelectedSort as string) ?? "price_asc";
 }
 
 <div class="text-center">
     <h3 class="display-5 fw-bold">Nasza oferta muzyczna</h3>
     <br />
+
+    <div class="container mb-4">
+        <form method="get" class="row g-2 justify-content-center align-items-end">
+            <div class="col-auto">
+                <label class="form-label small text-white-50">Dostępność</label>
+                <select name="availability" class="form-select bg-dark text-white">
+                    <option value="" selected="@(selAv == "all" ? "selected" : "")">Wszystkie</option>
+                    <option value="in" selected="@(selAv == "in" ? "selected" : "")">Na stanie</option>
+                    <option value="out" selected="@(selAv == "out" ? "selected" : "")">Brak na stanie</option>
+                </select>
+            </div>
+
+            <div class="col-auto">
+                <label class="form-label small text-white-50">Gatunek</label>
+                <select name="kategoriaId" class="form-select bg-dark text-white">
+                    <option value="">Wszystkie</option>
+                    @foreach (var c in categories)
+                    {
+                        <option value="@c.Id" selected="@(selCat.HasValue && selCat.Value == c.Id ? "selected" : "")">@c.Nazwa</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-auto">
+                <label class="form-label small text-white-50 ">Sortuj</label>
+                <select name="sort" class="form-select bg-dark text-white ">
+                    <option value="price_asc" selected="@(selSort == "price_asc" ? "selected" : "")">Cena rosnąco</option>
+                    <option value="price_desc" selected="@(selSort == "price_desc" ? "selected" : "")">Cena malejąco</option>
+                </select>
+            </div>
+
+            <div class="col-auto">
+                <button type="submit" class="btn btn-outline-success">Filtruj</button>
+                <a href="@(Url.Action("Index", "Home"))" class="btn btn-outline-danger ms-2">Wyczyść</a>
+            </div>
+        </form>
+    </div>
 
     <div class="container text-center text-under-square">
         <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
@@ -104,7 +145,7 @@
                                     const modal = new bootstrap.Modal(modalEl);
                                     modal.show();
                                 } else {
-                                    alert('Dodano do koszyka');
+                                    alert('Dodano do koszyku');
                                 }
                             } else {
                                 alert('Produkt już w koszyku lub wystąpił błąd.');

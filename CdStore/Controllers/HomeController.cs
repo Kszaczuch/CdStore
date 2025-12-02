@@ -3,6 +3,7 @@ using CdStore.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using System.Globalization;
 using System.Security.Claims;
@@ -40,10 +41,51 @@ namespace CdStore.Controllers
             return newId;
         }
 
+
+
         [AllowAnonymous]
-        public IActionResult Index()
+        public IActionResult Index(int? kategoriaId, string availability, string sort)
         {
-            var albumy = _context.Albumy.ToList();
+
+            var query = _context.Albumy.Include(a => a.Kategoria).AsQueryable();
+
+            if (kategoriaId.HasValue)
+            {
+                query = query.Where(a => a.KategoriaId == kategoriaId.Value);
+            }
+
+
+            if (!string.IsNullOrEmpty(availability))
+            {
+                if (availability == "in")
+                {
+                    query = query.Where(a => a.IloscNaStanie > 0);
+                }
+                else if (availability == "out")
+                {
+                    query = query.Where(a => a.IloscNaStanie == 0);
+                }
+            }
+
+            if (string.IsNullOrEmpty(sort)) sort = "price_asc";
+            switch (sort)
+            {
+                case "price_desc":
+                    query = query.OrderByDescending(a => a.Cena);
+                    break;
+                default:
+                    query = query.OrderBy(a => a.Cena);
+                    break;
+            }
+
+            var albumy = query.ToList();
+
+            var categories = _context.Kategorie.OrderBy(c => c.Nazwa).ToList();
+            ViewBag.Categories = categories;
+            ViewBag.SelectedCategoryId = kategoriaId;
+            ViewBag.SelectedAvailability = string.IsNullOrEmpty(availability) ? "all" : availability;
+            ViewBag.SelectedSort = sort;
+
             var cartId = GetOrCreateCartId();
             var cartItems = _cartService.GetCartItems(cartId);
             ViewBag.CartIds = cartItems;
@@ -175,7 +217,6 @@ namespace CdStore.Controllers
             return Json(new { success = true });
         }
 
-        [HttpPost]
         [HttpPost]
         public IActionResult Buy()
         {
