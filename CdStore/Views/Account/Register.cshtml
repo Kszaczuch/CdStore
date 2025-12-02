@@ -19,7 +19,7 @@
             </div>
             <div class="mb-3">
                 <label asp-for="Email" class="form-label"></label>
-                <input asp-for="Email" class="form-control text-white bg-dark""  />
+                <input asp-for="Email" class="form-control text-white bg-dark" />
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
             <div class="mb-3">
@@ -35,6 +35,9 @@
             <input type="submit" value="Register" class="btn btn-success w-100 p-2" />
             <p class="text-center mt-2">
                 Masz już konto? <a asp-controller="Account" asp-action="Login" class="text-decoration-none">Zaloguj</a>
+            </p>
+            <p class="text-center mt-2">
+                <a asp-controller="Home" asp-action="Index" class="text-decoration-none">Powrót na stronę główną</a>
             </p>
         </form>
     </div>

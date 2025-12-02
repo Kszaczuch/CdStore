@@ -61,6 +61,18 @@ namespace CdStore.Controllers
             return View(album);
         }
 
+        [AllowAnonymous]
+        public IActionResult Regulamin()
+        {
+            return View();
+        }
+
+        [AllowAnonymous]
+        public IActionResult PolitykaPrywatnosci()
+        {
+            return View();
+        }
+
         [Authorize(Roles = "Admin")]
         public IActionResult Privacy(int? id)
         {
