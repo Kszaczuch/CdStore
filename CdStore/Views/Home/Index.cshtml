@@ -13,22 +13,33 @@
             @foreach (var album in Model)
             {
                 var inCart = cartIds.Contains(album.Id);
+                var available = album.IloscNaStanie > 0;
                 <div class="col">
                     <img class="img-fluid square-img rounded" src="@album.OkladkaLink" alt="@album.Tytul" />
                     <p class="product-title">@album.Tytul - @album.Artysta</p>
                     <div><strong>@album.Cena.ToString("C")</strong></div>
-                    @if (!(User?.Identity?.IsAuthenticated == true))
-                    {
-                        <a href="@(Url.Action("Login", "Account"))" class="btn @(inCart ? "btn-success" : "btn-outline-info") responsive-btn" style="margin-top:8px;">
-                            @(inCart ? "W koszyku" : "Dodaj do koszyka")
-                        </a>
-                    }
-                    else
-                    {
-                        <button class="btn @(inCart ? "btn-success" : "btn-outline-info") responsive-btn btn-cart" data-id="@album.Id" data-in-cart="@(inCart ? "1" : "0")" style="margin-top:8px;">
-                            @(inCart ? "W koszyku" : "Dodaj do koszyka")
-                        </button>
-                    }
+                    <div class="d-flex flex-column align-items-center" style="gap:8px; margin-top:8px;">
+                        @if (!available)
+                        {
+                            <button class="btn btn-secondary mb-2" disabled>Brak na stanie</button>
+                        }
+                        else
+                        {
+                            if (!(User?.Identity?.IsAuthenticated == true))
+                            {
+                                <a href="@(Url.Action("Login", "Account"))" class="btn @(inCart ? "btn-success" : "btn-outline-info") mb-2">
+                                    @(inCart ? "W koszyku" : "Dodaj do koszyka")
+                                </a>
+                            }
+                            else
+                            {
+                                <button class="btn @(inCart ? "btn-success" : "btn-outline-info") responsive-btn btn-cart mb-2" data-id="@album.Id" data-in-cart="@(inCart ? "1" : "0")">
+                                    @(inCart ? "W koszyku" : "Dodaj do koszyka")
+                                </button>
+                            }
+                        }
+                        <a href="@(Url.Action("Detale", "Home", new { id = album.Id }))" class="btn btn-outline-secondary mb-2">Szczegóły</a>
+                    </div>
                 </div>
             }
         </div>
