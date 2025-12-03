@@ -44,31 +44,31 @@ namespace CdStore.Controllers
 
 
         [AllowAnonymous]
-        public IActionResult Index(int? kategoriaId, string availability, string sort)
+        public IActionResult Index(IndexHomeVm model )
         {
 
             var query = _context.Albumy.Include(a => a.Kategoria).AsQueryable();
 
-            if (kategoriaId.HasValue)
+            if (model.kategoriaId.HasValue && model.kategoriaId.Value != 0)
             {
-                query = query.Where(a => a.KategoriaId == kategoriaId.Value);
+                query = query.Where(a => a.KategoriaId == model.kategoriaId.Value);
             }
 
 
-            if (!string.IsNullOrEmpty(availability))
+            if (!string.IsNullOrEmpty(model.availability))
             {
-                if (availability == "in")
+                if (model.availability == "in")
                 {
                     query = query.Where(a => a.IloscNaStanie > 0);
                 }
-                else if (availability == "out")
+                else if (model.availability == "out")
                 {
                     query = query.Where(a => a.IloscNaStanie == 0);
                 }
             }
 
-            if (string.IsNullOrEmpty(sort)) sort = "price_asc";
-            switch (sort)
+            if (string.IsNullOrEmpty(model.sort)) model.sort = "price_asc";
+            switch (model.sort)
             {
                 case "price_desc":
                     query = query.OrderByDescending(a => a.Cena);
@@ -82,14 +82,15 @@ namespace CdStore.Controllers
 
             var categories = _context.Kategorie.OrderBy(c => c.Nazwa).ToList();
             ViewBag.Categories = categories;
-            ViewBag.SelectedCategoryId = kategoriaId;
-            ViewBag.SelectedAvailability = string.IsNullOrEmpty(availability) ? "all" : availability;
-            ViewBag.SelectedSort = sort;
+            ViewBag.SelectedCategoryId = model.kategoriaId;
+            ViewBag.SelectedAvailability = string.IsNullOrEmpty(model.availability) ? "all" : model.availability;
+            ViewBag.SelectedSort = model.sort;
 
             var cartId = GetOrCreateCartId();
             var cartItems = _cartService.GetCartItems(cartId);
             ViewBag.CartIds = cartItems;
-            return View(albumy);
+            model.Albums = albumy;
+            return View(model);
         }
 
         [AllowAnonymous]
