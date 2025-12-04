@@ -3,6 +3,7 @@
     ViewData["Title"] = "Home";
     var cartIds = (ViewBag.CartIds as List<int>) ?? new List<int>();
     var categories = ViewBag.Categories as List<CdStore.Models.Kategoria> ?? new List<CdStore.Models.Kategoria>();
+    var favIds = (ViewBag.FavoriteIds as List<int>) ?? new List<int>();
 }
 
 <div class="text-center">
@@ -54,6 +55,7 @@
             {
                 var inCart = cartIds.Contains(album.Id);
                 var available = album.IloscNaStanie > 0;
+                var isFav = favIds.Contains(album.Id);
                 <div class="col">
                     <img class="img-fluid square-img rounded" src="@album.OkladkaLink" alt="@album.Tytul" />
                     <p class="product-title">@album.Tytul - @album.Artysta</p>
@@ -73,12 +75,27 @@
                             }
                             else
                             {
-                                <button class="btn @(inCart ? "btn-success" : "btn-outline-info") mb-2" data-id="@album.Id" data-in-cart="@(inCart ? "1" : "0")">
+                                <button class="btn @(inCart ? "btn-success" : "btn-outline-info") mb-2 btn-cart" data-id="@album.Id" data-in-cart="@(inCart ? "1" : "0")">
                                     @(inCart ? "W koszyku" : "Dodaj do koszyka")
                                 </button>
                             }
                         }
-                        <a href="@(Url.Action("Detale", "Home", new { id = album.Id }))" class="btn btn-outline-secondary mb-2">Szczegóły</a>
+                        <div class="d-flex gap-2">
+                            <a href="@(Url.Action("Detale", "Home", new { id = album.Id }))" class="btn btn-outline-secondary mb-2">Szczegóły</a>
+
+                            @if (!(User?.Identity?.IsAuthenticated == true))
+                            {
+                                <a href="@(Url.Action("Login", "Account"))" class="btn btn-link mb-2" title="Dodaj do ulubionych">
+                                    <i class="bi @(isFav ? "bi-heart-fill text-danger" : "bi-heart text-white")" style="font-size:1.25rem;"></i>
+                                </a>
+                            }
+                            else
+                            {
+                                <button class="btn btn-link btn-fav mb-2" data-id="@album.Id" data-in-fav="@(isFav ? "1" : "0")" title="Ulubione" aria-pressed="@(isFav ? "true" : "false")">
+                                    <i class="bi @(isFav ? "bi-heart-fill text-danger" : "bi-heart text-white")" style="font-size:1.25rem;"></i>
+                                </button>
+                            }
+                        </div>
                     </div>
                 </div>
             }
@@ -108,6 +125,7 @@
     <script>
         (function () {
             const preselected = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(cartIds ?? new List<int>()));
+            const preFavorites = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(favIds ?? new List<int>()));
 
             if (Array.isArray(preselected)) {
                 preselected.forEach(id => {
@@ -117,6 +135,21 @@
                         btn.classList.remove('btn-outline-info');
                         btn.classList.add('btn-success');
                         btn.dataset.inCart = '1';
+                    }
+                });
+            }
+
+            if (Array.isArray(preFavorites)) {
+                preFavorites.forEach(id => {
+                    const btn = document.querySelector('.btn-fav[data-id="' + id + '"]');
+                    if (btn) {
+                        const icon = btn.querySelector('i');
+                        if (icon) {
+                            icon.classList.remove('bi-heart', 'text-white');
+                            icon.classList.add('bi-heart-fill', 'text-danger');
+                        }
+                        btn.dataset.inFav = '1';
+                        btn.setAttribute('aria-pressed', 'true');
                     }
                 });
             }
@@ -144,13 +177,55 @@
                                     const modal = new bootstrap.Modal(modalEl);
                                     modal.show();
                                 } else {
-                                    alert('Dodano do koszyku');
+                                    alert('Dodano do koszyka');
                                 }
                             } else {
                                 alert('Produkt już w koszyku lub wystąpił błąd.');
                             }
                         })
                         .catch(() => alert('Wystąpił błąd podczas dodawania do koszyka.'));
+                }
+
+                const favBtn = target.closest ? target.closest('.btn-fav') : (target.classList.contains('btn-fav') ? target : null);
+                if (favBtn && favBtn.classList.contains('btn-fav')) {
+                    const id = favBtn.getAttribute('data-id');
+                    if (!id) return;
+                    const inFav = favBtn.getAttribute('data-in-fav') === '1';
+                    const icon = favBtn.querySelector('i');
+
+                    if (inFav) {
+                        fetch('/Home/RemoveFromFavorites?albumId=' + encodeURIComponent(id), { method: 'POST' })
+                            .then(r => r.json())
+                            .then(j => {
+                                if (j && j.success) {
+                                    if (icon) {
+                                        icon.classList.remove('bi-heart-fill', 'text-danger');
+                                        icon.classList.add('bi-heart', 'text-white');
+                                    }
+                                    favBtn.setAttribute('data-in-fav', '0');
+                                    favBtn.setAttribute('aria-pressed', 'false');
+                                } else {
+                                    alert('Nie udało się usunąć z ulubionych.');
+                                }
+                            })
+                            .catch(() => alert('Wystąpił błąd podczas usuwania z ulubionych.'));
+                    } else {
+                        fetch('/Home/AddToFavorites?albumId=' + encodeURIComponent(id), { method: 'POST' })
+                            .then(r => r.json())
+                            .then(j => {
+                                if (j && j.success) {
+                                    if (icon) {
+                                        icon.classList.remove('bi-heart', 'text-white');
+                                        icon.classList.add('bi-heart-fill', 'text-danger');
+                                    }
+                                    favBtn.setAttribute('data-in-fav', '1');
+                                    favBtn.setAttribute('aria-pressed', 'true');
+                                } else {
+                                    alert('Nie udało się dodać do ulubionych.');
+                                }
+                            })
+                            .catch(() => alert('Wystąpił błąd podczas dodawania do ulubionych.'));
+                    }
                 }
             });
 

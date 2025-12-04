@@ -95,6 +95,21 @@ namespace CdStore.Controllers
             var cartId = GetOrCreateCartId();
             var cartItems = _cartService.GetCartItems(cartId);
             ViewBag.CartIds = cartItems;
+
+            var favoriteIds = new List<int>();
+            if (User?.Identity?.IsAuthenticated == true)
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    favoriteIds = _context.Favorites
+                        .Where(f => f.UserId == userId)
+                        .Select(f => f.AlbumId)
+                        .ToList();
+                }
+            }
+            ViewBag.FavoriteIds = favoriteIds;
+
             model.Albums = albumy;
             return View(model);
         }
@@ -109,6 +124,21 @@ namespace CdStore.Controllers
             var cartId = GetOrCreateCartId();
             var cartItems = _cartService.GetCartItems(cartId);
             ViewBag.CartIds = cartItems;
+
+            var favoriteIds = new List<int>();
+            if (User?.Identity?.IsAuthenticated == true)
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    favoriteIds = _context.Favorites
+                        .Where(f => f.UserId == userId)
+                        .Select(f => f.AlbumId)
+                        .ToList();
+                }
+            }
+            ViewBag.FavoriteIds = favoriteIds;
+
             return View(album);
         }
 
@@ -313,6 +343,40 @@ namespace CdStore.Controllers
             _context.SaveChanges();
 
             _cartService.Clear(cartId);
+            return Json(new { success = true });
+        }
+
+        [HttpPost]
+        public IActionResult AddToFavorites(int albumId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return Json(new { success = false });
+
+            if (!_context.Albumy.Any(a => a.Id == albumId)) return Json(new { success = false });
+
+            var exists = _context.Favorites.Any(f => f.UserId == userId && f.AlbumId == albumId);
+            if (!exists)
+            {
+                _context.Favorites.Add(new Favorite { UserId = userId, AlbumId = albumId });
+                _context.SaveChanges();
+            }
+
+            return Json(new { success = true });
+        }
+
+        [HttpPost]
+        public IActionResult RemoveFromFavorites(int albumId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return Json(new { success = false });
+
+            var fav = _context.Favorites.FirstOrDefault(f => f.UserId == userId && f.AlbumId == albumId);
+            if (fav != null)
+            {
+                _context.Favorites.Remove(fav);
+                _context.SaveChanges();
+            }
+
             return Json(new { success = true });
         }
 

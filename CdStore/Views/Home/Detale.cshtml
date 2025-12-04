@@ -5,6 +5,8 @@
     var cartIds = (ViewBag.CartIds as List<int>) ?? new List<int>();
     var inCart = Model != null && cartIds.Contains(Model.Id);
     var available = Model != null && Model.IloscNaStanie > 0;
+    var favIds = (ViewBag.FavoriteIds as List<int>) ?? new List<int>();
+    var isFav = Model != null && favIds.Contains(Model.Id);
 }
 
 <div class="container py-4">
@@ -33,26 +35,43 @@
                     <span class="fs-4 text-muted">@Model.IloscNaStanie.ToString() na stanie</span>
                 </div>
 
-                @if (!available)
-                {
-                    <button class="btn btn-secondary btn-lg" disabled>Brak na stanie</button>
-                }
-                else
-                {
+                <div class="d-flex align-items-center gap-2 mb-2 justify-content-md-end flex-wrap">
                     @if (!(User?.Identity?.IsAuthenticated == true))
                     {
-                        <a href="@(Url.Action("Login", "Account"))" class="btn @(inCart ? "btn-success" : "btn-outline-info") btn-lg">
-                            @(inCart ? "W koszyku" : "Dodaj do koszyka")
+                        <a href="@(Url.Action("Login", "Account"))" class="btn btn-link" title="Dodaj do ulubionych">
+                            <i class="bi @(isFav ? "bi-heart-fill text-danger" : "bi-heart text-white")" style="font-size:1.25rem;"></i>
                         </a>
                     }
                     else
                     {
-                        <button class="btn @(inCart ? "btn-success" : "btn-outline-info") btn-lg" data-id="@Model.Id" data-in-cart="@(inCart ? "1" : "0")">
-                            @(inCart ? "W koszyku" : "Dodaj do koszyka")
+                        <button class="btn btn-link btn-fav" data-id="@Model.Id" data-in-fav="@(isFav ? "1" : "0")" title="Ulubione" aria-pressed="@(isFav ? "true" : "false")">
+                            <i class="bi @(isFav ? "bi-heart-fill text-danger" : "bi-heart text-white")" style="font-size:1.25rem;"></i>
                         </button>
                     }
-                }
-                <a href="@(Url.Action("Index", "Home"))" class="btn btn-outline-secondary btn-lg ms-2">Powrót do listy</a>
+
+                    @if (!available)
+                    {
+                        <button class="btn btn-secondary btn-lg" disabled>Brak na stanie</button>
+                    }
+                    else
+                    {
+                        @if (!(User?.Identity?.IsAuthenticated == true))
+                        {
+                            <a href="@(Url.Action("Login", "Account"))" class="btn @(inCart ? "btn-success" : "btn-outline-info") btn-lg">
+                                @(inCart ? "W koszyku" : "Dodaj do koszyka")
+                            </a>
+                        }
+                        else
+                        {
+                            <button class="btn @(inCart ? "btn-success" : "btn-outline-info") btn-lg btn-cart" data-id="@Model.Id" data-in-cart="@(inCart ? "1" : "0")">
+                                @(inCart ? "W koszyku" : "Dodaj do koszyka")
+                            </button>
+                        }
+                    }
+
+                    <a href="@(Url.Action("Index", "Home"))" class="btn btn-outline-secondary btn-lg ms-2">Powrót do listy</a>
+                </div>
+
             </div>
         </div>
     </div>
@@ -79,6 +98,23 @@
 @section Scripts {
     <script>
         (function () {
+            const preFavorites = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(favIds ?? new List<int>()));
+
+            if (Array.isArray(preFavorites)) {
+                preFavorites.forEach(id => {
+                    const btn = document.querySelector('.btn-fav[data-id="' + id + '"]');
+                    if (btn) {
+                        const icon = btn.querySelector('i');
+                        if (icon) {
+                            icon.classList.remove('bi-heart', 'text-white');
+                            icon.classList.add('bi-heart-fill', 'text-danger');
+                        }
+                        btn.dataset.inFav = '1';
+                        btn.setAttribute('aria-pressed', 'true');
+                    }
+                });
+            }
+
             document.addEventListener('click', function (e) {
                 const target = e.target;
                 if (!target) return;
@@ -101,6 +137,48 @@
                             }
                         })
                         .catch(() => alert('Wystąpił błąd podczas dodawania do koszyka.'));
+                }
+
+                const favBtn = target.closest ? target.closest('.btn-fav') : (target.classList.contains('btn-fav') ? target : null);
+                if (favBtn && favBtn.classList.contains('btn-fav')) {
+                    const id = favBtn.getAttribute('data-id');
+                    if (!id) return;
+                    const inFav = favBtn.getAttribute('data-in-fav') === '1';
+                    const icon = favBtn.querySelector('i');
+
+                    if (inFav) {
+                        fetch('/Home/RemoveFromFavorites?albumId=' + encodeURIComponent(id), { method: 'POST' })
+                            .then(r => r.json())
+                            .then(j => {
+                                if (j && j.success) {
+                                    if (icon) {
+                                        icon.classList.remove('bi-heart-fill', 'text-danger');
+                                        icon.classList.add('bi-heart', 'text-white');
+                                    }
+                                    favBtn.setAttribute('data-in-fav', '0');
+                                    favBtn.setAttribute('aria-pressed', 'false');
+                                } else {
+                                    alert('Nie udało się usunąć z ulubionych.');
+                                }
+                            })
+                            .catch(() => alert('Wystąpił błąd podczas usuwania z ulubionych.'));
+                    } else {
+                        fetch('/Home/AddToFavorites?albumId=' + encodeURIComponent(id), { method: 'POST' })
+                            .then(r => r.json())
+                            .then(j => {
+                                if (j && j.success) {
+                                    if (icon) {
+                                        icon.classList.remove('bi-heart', 'text-white');
+                                        icon.classList.add('bi-heart-fill', 'text-danger');
+                                    }
+                                    favBtn.setAttribute('data-in-fav', '1');
+                                    favBtn.setAttribute('aria-pressed', 'true');
+                                } else {
+                                    alert('Nie udało się dodać do ulubionych.');
+                                }
+                            })
+                            .catch(() => alert('Wystąpił błąd podczas dodawania do ulubionych.'));
+                    }
                 }
             });
         })();
