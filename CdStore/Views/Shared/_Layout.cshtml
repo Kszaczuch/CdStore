@@ -17,7 +17,7 @@
         <nav class="navbar navbar-expand-sm navbar-dark bg-dark border-bottom box-shadow mb-3">
             <div class="container-fluid d-flex align-items-center">
 
-             
+
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Muzyczni.pl</a>
 
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -25,40 +25,45 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <div class="collapse navbar-collapse d-flex align-items-center justify-content-between" id="navbarNav">
-                    <ul class="navbar-nav d-flex align-items-center">
-                        <li class="nav-item">
-                            <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Index">Strona główna</a>
-                        </li>
-                        @if (signInManager.IsSignedIn(User) && User.IsInRole("Admin"))
-                        {
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <div class="w-100 d-flex align-items-center justify-content-between">
+                        <ul class="navbar-nav d-flex align-items-center">
                             <li class="nav-item">
-                                <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Privacy">Zarządzanie</a>
+                                <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Index">Strona główna</a>
+                                @if (signInManager.IsSignedIn(User) && User.IsInRole("Admin"))
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Privacy">Albumy</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Gatunki">Gatunki</a>
+                                    </li>
+                                }
                             </li>
-                        }
-                        @if (signInManager.IsSignedIn(User))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-white" asp-area="" asp-controller="Account" asp-action="Profile">Profil</a>
-                            </li>
-                        }
-                    </ul>
+                        </ul>
 
-                    <ul class="navbar-nav d-flex align-items-center">
-                        <li class="nav-item">
-                            <a class="nav-link text-white d-flex align-items-center"
-                               asp-area="" asp-controller="Home" asp-action="Koszyk">
-                                <i class="bi bi-basket2" style="font-size: 1.5rem;"></i>
-                            </a>
-                        </li>
-                        <partial name="_LoginPartial" />
-                    </ul>
+                        <ul class="navbar-nav d-flex align-items-center">
+                            @if (signInManager.IsSignedIn(User))
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-white" asp-area="" asp-controller="Account" asp-action="Profile">Profil</a>
+                                </li>
+                            }
+                            <li class="nav-item">
+                                <a class="nav-link text-white d-flex align-items-center"
+                                   asp-area="" asp-controller="Home" asp-action="Koszyk">
+                                    <i class="bi bi-basket2" style="font-size: 1.5rem;"></i>
+                                </a>
+                            </li>
+                            <partial name="_LoginPartial" />
+                        </ul>
+                    </div>
                 </div>
             </div>
         </nav>
 
     </header>
-    <div class="container">
+    <div class="container pb-5">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>

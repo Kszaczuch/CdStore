@@ -199,6 +199,62 @@ namespace CdStore.Controllers
             }
             return RedirectToAction("Privacy");
         }
+
+        [Authorize(Roles = "Admin")]
+        public IActionResult Gatunki(int? id)
+        {
+            var categories = _context.Kategorie.OrderBy(c => c.Nazwa).ToList();
+            if (id.HasValue)
+            {
+                var selected = _context.Kategorie.Find(id.Value);
+                ViewBag.SelectedCategory = selected;
+            }
+            return View(categories);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult SaveCategoryForm(CdStore.Models.Kategoria model)
+        {
+            if (model == null) return RedirectToAction("Gatunki");
+            if (string.IsNullOrWhiteSpace(model.Nazwa))
+            {
+                return RedirectToAction("Gatunki");
+            }
+
+            if (model.Id == 0)
+            {
+                _context.Kategorie.Add(model);
+            }
+            else
+            {
+                var existing = _context.Kategorie.Find(model.Id);
+                if (existing != null)
+                {
+                    existing.Nazwa = model.Nazwa;
+                    _context.Kategorie.Update(existing);
+                }
+            }
+
+            _context.SaveChanges();
+            return RedirectToAction("Gatunki");
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteCategoryForm(int id)
+        {
+            var cat = _context.Kategorie.Find(id);
+            if (cat != null)
+            {
+                _context.Kategorie.Remove(cat);
+                _context.SaveChanges();
+            }
+            return RedirectToAction("Gatunki");
+        }
+
         public IActionResult Koszyk()
         {
             var cartId = GetOrCreateCartId();
