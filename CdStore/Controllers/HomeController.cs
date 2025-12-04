@@ -346,6 +346,32 @@ namespace CdStore.Controllers
             return Json(new { success = true });
         }
 
+        public IActionResult Favorites()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Challenge();
+            }
+
+            var favoriteIds = _context.Favorites
+                .Where(f => f.UserId == userId)
+                .Select(f => f.AlbumId)
+                .ToList();
+
+            var albums = _context.Albumy
+                .Include(a => a.Kategoria)
+                .Where(a => favoriteIds.Contains(a.Id))
+                .ToList();
+
+            var cartId = GetOrCreateCartId();
+            var cartItems = _cartService.GetCartItems(cartId);
+            ViewBag.CartIds = cartItems;
+            ViewBag.FavoriteIds = favoriteIds;
+
+            return View(albums);
+        }
+
         [HttpPost]
         public IActionResult AddToFavorites(int albumId)
         {
