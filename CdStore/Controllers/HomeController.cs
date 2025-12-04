@@ -102,7 +102,9 @@ namespace CdStore.Controllers
         [AllowAnonymous]
         public IActionResult Detale(int id)
         {
-            var album = _context.Albumy.Find(id);
+            var album = _context.Albumy
+                .Include(a => a.Kategoria)
+                .FirstOrDefault(a => a.Id == id);
             if (album == null) return NotFound();
             var cartId = GetOrCreateCartId();
             var cartItems = _cartService.GetCartItems(cartId);
