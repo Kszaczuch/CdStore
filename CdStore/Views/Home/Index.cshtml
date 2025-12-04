@@ -34,6 +34,8 @@
             <div class="col-auto">
                 <label class="form-label small text-white-50 ">Sortuj</label>
                 <select asp-for="sort" class="form-select bg-dark text-white ">
+                    <option value="name_asc">Nazwa A-Z</option>
+                    <option value="name_desc">Nazwa Z-A</option>
                     <option value="price_asc">Cena rosnąco</option>
                     <option value="price_desc">Cena malejąco</option>
                 </select>

@@ -67,14 +67,20 @@ namespace CdStore.Controllers
                 }
             }
 
-            if (string.IsNullOrEmpty(model.sort)) model.sort = "price_asc";
+            if (string.IsNullOrEmpty(model.sort)) model.sort = "name_asc";
             switch (model.sort)
             {
                 case "price_desc":
                     query = query.OrderByDescending(a => a.Cena);
                     break;
-                default:
+                case "name_desc":
+                    query = query.OrderByDescending(a => a.Tytul);
+                    break;
+                case "price_asc":
                     query = query.OrderBy(a => a.Cena);
+                    break;
+                default:
+                    query = query.OrderBy(a => a.Tytul);
                     break;
             }
 
