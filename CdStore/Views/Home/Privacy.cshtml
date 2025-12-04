@@ -2,30 +2,47 @@
 @{
     ViewData["Title"] = "Zarządzanie produktów";
     var sel = ViewBag.SelectedAlbum as CdStore.Models.Album;
+    var categories = ViewBag.Categories as List<CdStore.Models.Kategoria> ?? new List<CdStore.Models.Kategoria>();
 }
 <h1 class="mb-4">@ViewData["Title"]</h1>
 
 <div class="card bg-dark text-white mb-4">
     <div class="card-body">
-        <form asp-action="SaveProductForm" method="post" class="row g-2 align-items-center">
+        <form asp-action="SaveProductForm" method="post" class="row g-2 align-items-center needs-validation" novalidate>
             @Html.AntiForgeryToken()
             <input type="hidden" name="Id" value="@(sel != null ? sel.Id.ToString() : "")" />
-
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <input name="OkladkaLink" class="form-control text-white bg-dark" placeholder="Link do zdjęcia (OkladkaLink)" value="@(sel?.OkladkaLink ?? "")" />
             </div>
             <div class="col-md-3">
-                <input name="Tytul" class="form-control text-white bg-dark" placeholder="Nazwa (Tytul)" value="@(sel?.Tytul ?? "")" />
+                <input name="Tytul" class="form-control text-white bg-dark" placeholder="Nazwa (Tytul)" value="@(sel?.Tytul ?? "")" required />
+                <div class="invalid-feedback">Nazwa jest wymagana.</div>
             </div>
-            <div class="col-md-3">
-                <input name="Artysta" class="form-control text-white bg-dark" placeholder="Wykonawca (Artysta)" value="@(sel?.Artysta ?? "")" />
+            <div class="col-md-2">
+                <input name="Artysta" class="form-control text-white bg-dark" placeholder="Wykonawca (Artysta)" value="@(sel?.Artysta ?? "")" required />
+                <div class="invalid-feedback">Wykonawca jest wymagany.</div>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label visually-hidden">Gatunek</label>
+                <select name="KategoriaId" class="form-select bg-dark text-white">
+                    <option value="">- brak -</option>
+                    @foreach (var c in categories)
+                    {
+                        <option value="@c.Id">@c.Nazwa</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-1">
+                <input name="Cena" type="number" step="0.01" min="0" class="form-control text-white bg-dark" placeholder="Cena" value="@(sel != null ? sel.Cena.ToString("F2", System.Globalization.CultureInfo.InvariantCulture) : "")" required />
+                <div class="invalid-feedback">Podaj poprawną cenę.</div>
             </div>
             <div class="col-md-1">
-                <input name="Cena" type="number" step="0.01" class="form-control text-white bg-dark" placeholder="Cena" value="@(sel != null ? sel.Cena.ToString("F2", System.Globalization.CultureInfo.InvariantCulture) : "")" />
+                <input name="IloscNaStanie" type="number" step="1" min="0" class="form-control text-white bg-dark" placeholder="Ilość" value="@(sel != null ? sel.IloscNaStanie.ToString() : "")" required />
+                <div class="invalid-feedback">Podaj ilość (>= 0).</div>
             </div>
-            <div class="col-md-1">
-                <input name="IloscNaStanie" type="number" step="1" min="0" class="form-control text-white bg-dark" placeholder="Ilość" value="@(sel != null ? sel.IloscNaStanie.ToString() : "")" />
-            </div>
+
             <div class="col-12 mt-2">
                 <label class="form-label">Opis</label>
                 <textarea name="Opis" class="form-control text-white bg-dark" rows="6">@sel?.Opis</textarea>
@@ -43,6 +60,7 @@
             <tr>
                 <th style="width:90px"></th>
                 <th>Nazwa - Wykonawca</th>
+                <th style="width:160px">Gatunek</th>
                 <th style="width:120px" class="text-end">Cena</th>
                 <th style="width:120px" class="text-end">Ilość</th>
                 <th style="width:160px" class="text-end"></th>
@@ -57,7 +75,12 @@
                         <td class="text-start">
                             <img class="img-fluid rounded" src="@a.OkladkaLink" alt="@a.Tytul" style="max-width:80px" />
                         </td>
-                        <td>@a.Tytul - @a.Artysta</td>
+                        <td>
+                            @a.Tytul - @a.Artysta
+                        </td>
+                        <td>
+                            <span class="text-muted small">@a.Kategoria?.Nazwa</span>
+                        </td>
                         <td class="text-end">@a.Cena.ToString("C")</td>
                         <td class="text-end">@a.IloscNaStanie.ToString()</td>
                         <td class="text-end" style="white-space:nowrap;">
@@ -77,9 +100,26 @@
             else
             {
                 <tr>
-                    <td colspan="4">Brak produktów.</td>
+                    <td colspan="6">Brak produktów.</td>
                 </tr>
             }
         </tbody>
     </table>
 </div>
+
+@section Scripts {
+    <script>
+        (function () {
+            var forms = document.querySelectorAll('.needs-validation');
+            Array.prototype.slice.call(forms).forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        })();
+    </script>
+}

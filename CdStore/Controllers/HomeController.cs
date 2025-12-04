@@ -3,6 +3,7 @@ using CdStore.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using System.Globalization;
 using System.Security.Claims;
@@ -40,20 +41,70 @@ namespace CdStore.Controllers
             return newId;
         }
 
+
+
         [AllowAnonymous]
-        public IActionResult Index()
+        public IActionResult Index(IndexHomeVm model )
         {
-            var albumy = _context.Albumy.ToList();
+
+            var query = _context.Albumy.Include(a => a.Kategoria).AsQueryable();
+
+            if (model.kategoriaId.HasValue && model.kategoriaId.Value != 0)
+            {
+                query = query.Where(a => a.KategoriaId == model.kategoriaId.Value);
+            }
+
+
+            if (!string.IsNullOrEmpty(model.availability))
+            {
+                if (model.availability == "in")
+                {
+                    query = query.Where(a => a.IloscNaStanie > 0);
+                }
+                else if (model.availability == "out")
+                {
+                    query = query.Where(a => a.IloscNaStanie == 0);
+                }
+            }
+
+            if (string.IsNullOrEmpty(model.sort)) model.sort = "name_asc";
+            switch (model.sort)
+            {
+                case "price_desc":
+                    query = query.OrderByDescending(a => a.Cena);
+                    break;
+                case "name_desc":
+                    query = query.OrderByDescending(a => a.Tytul);
+                    break;
+                case "price_asc":
+                    query = query.OrderBy(a => a.Cena);
+                    break;
+                default:
+                    query = query.OrderBy(a => a.Tytul);
+                    break;
+            }
+
+            var albumy = query.ToList();
+
+            var categories = _context.Kategorie.OrderBy(c => c.Nazwa).ToList();
+            ViewBag.Categories = categories;
+            ViewBag.SelectedCategoryId = model.kategoriaId;
+            ViewBag.SelectedAvailability = string.IsNullOrEmpty(model.availability) ? "all" : model.availability;
+            ViewBag.SelectedSort = model.sort;
+
             var cartId = GetOrCreateCartId();
             var cartItems = _cartService.GetCartItems(cartId);
             ViewBag.CartIds = cartItems;
-            return View(albumy);
+            model.Albums = albumy;
+            return View(model);
         }
 
         [AllowAnonymous]
         public IActionResult Detale(int id)
         {
-            var album = _context.Albumy.Find(id);
+            var album = _context.Albumy
+                .Include(a => a.Kategoria)
+                .FirstOrDefault(a => a.Id == id);
             if (album == null) return NotFound();
             var cartId = GetOrCreateCartId();
             var cartItems = _cartService.GetCartItems(cartId);
@@ -76,10 +127,14 @@ namespace CdStore.Controllers
         [Authorize(Roles = "Admin")]
         public IActionResult Privacy(int? id)
         {
-            var albumy = _context.Albumy.ToList();
+            var albumy = _context.Albumy.Include(a => a.Kategoria).ToList();
+
+            var categories = _context.Kategorie.OrderBy(c => c.Nazwa).ToList();
+            ViewBag.Categories = categories;
+
             if (id.HasValue)
             {
-                var selected = _context.Albumy.Find(id.Value);
+                var selected = _context.Albumy.Include(a => a.Kategoria).FirstOrDefault(a => a.Id == id.Value);
                 ViewBag.SelectedAlbum = selected;
             }
             return View(albumy);
@@ -122,6 +177,7 @@ namespace CdStore.Controllers
                     existing.OkladkaLink = model.OkladkaLink;
                     existing.Opis = model.Opis;
                     existing.IloscNaStanie = model.IloscNaStanie;
+                    existing.KategoriaId = model.KategoriaId;
                     _context.Albumy.Update(existing);
                 }
             }
@@ -143,6 +199,62 @@ namespace CdStore.Controllers
             }
             return RedirectToAction("Privacy");
         }
+
+        [Authorize(Roles = "Admin")]
+        public IActionResult Gatunki(int? id)
+        {
+            var categories = _context.Kategorie.OrderBy(c => c.Nazwa).ToList();
+            if (id.HasValue)
+            {
+                var selected = _context.Kategorie.Find(id.Value);
+                ViewBag.SelectedCategory = selected;
+            }
+            return View(categories);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult SaveCategoryForm(CdStore.Models.Kategoria model)
+        {
+            if (model == null) return RedirectToAction("Gatunki");
+            if (string.IsNullOrWhiteSpace(model.Nazwa))
+            {
+                return RedirectToAction("Gatunki");
+            }
+
+            if (model.Id == 0)
+            {
+                _context.Kategorie.Add(model);
+            }
+            else
+            {
+                var existing = _context.Kategorie.Find(model.Id);
+                if (existing != null)
+                {
+                    existing.Nazwa = model.Nazwa;
+                    _context.Kategorie.Update(existing);
+                }
+            }
+
+            _context.SaveChanges();
+            return RedirectToAction("Gatunki");
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteCategoryForm(int id)
+        {
+            var cat = _context.Kategorie.Find(id);
+            if (cat != null)
+            {
+                _context.Kategorie.Remove(cat);
+                _context.SaveChanges();
+            }
+            return RedirectToAction("Gatunki");
+        }
+
         public IActionResult Koszyk()
         {
             var cartId = GetOrCreateCartId();
@@ -175,7 +287,6 @@ namespace CdStore.Controllers
             return Json(new { success = true });
         }
 
-        [HttpPost]
         [HttpPost]
         public IActionResult Buy()
         {

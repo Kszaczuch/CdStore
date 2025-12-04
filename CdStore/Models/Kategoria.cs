@@ -9,7 +9,5 @@ namespace CdStore.Models
         [Required]
         [MaxLength(100)]
         public string Nazwa { get; set; }
-
-        public string Opis { get; set; }
     }
 }
