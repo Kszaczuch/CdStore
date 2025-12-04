@@ -119,10 +119,14 @@ namespace CdStore.Controllers
         [Authorize(Roles = "Admin")]
         public IActionResult Privacy(int? id)
         {
-            var albumy = _context.Albumy.ToList();
+            var albumy = _context.Albumy.Include(a => a.Kategoria).ToList();
+
+            var categories = _context.Kategorie.OrderBy(c => c.Nazwa).ToList();
+            ViewBag.Categories = categories;
+
             if (id.HasValue)
             {
-                var selected = _context.Albumy.Find(id.Value);
+                var selected = _context.Albumy.Include(a => a.Kategoria).FirstOrDefault(a => a.Id == id.Value);
                 ViewBag.SelectedAlbum = selected;
             }
             return View(albumy);
@@ -165,6 +169,7 @@ namespace CdStore.Controllers
                     existing.OkladkaLink = model.OkladkaLink;
                     existing.Opis = model.Opis;
                     existing.IloscNaStanie = model.IloscNaStanie;
+                    existing.KategoriaId = model.KategoriaId;
                     _context.Albumy.Update(existing);
                 }
             }
