@@ -1,5 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @inject SignInManager<CdStore.Models.Users> signInManager
+@inject UserManager<CdStore.Models.Users> userManager
 
 <!DOCTYPE html>
 <html lang="en">
@@ -17,7 +18,6 @@
         <nav class="navbar navbar-expand-sm navbar-dark bg-dark border-bottom box-shadow mb-3">
             <div class="container-fluid d-flex align-items-center">
 
-
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Muzyczni.pl</a>
 
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -32,30 +32,66 @@
                                 <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Index">Strona główna</a>
                                 @if (signInManager.IsSignedIn(User) && User.IsInRole("Admin"))
                                 {
-                                    <li class="nav-item">
-                                        <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Privacy">Albumy</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Gatunki">Gatunki</a>
-                                    </li>
-                                }
+                                <li class="nav-item">
+                                    <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Privacy">Albumy</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Gatunki">Gatunki</a>
+                                </li>
+                            }
                             </li>
                         </ul>
 
                         <ul class="navbar-nav d-flex align-items-center">
                             @if (signInManager.IsSignedIn(User))
                             {
-                                <li class="nav-item">
-                                    <a class="nav-link text-white" asp-area="" asp-controller="Account" asp-action="Profile">Profil</a>
+                                var currentUser = await userManager.GetUserAsync(User);
+                                var fullName = currentUser?.FullName ?? User.Identity?.Name ?? "";
+
+                                <li class="nav-item dropdown d-none d-sm-block">
+                                    <a class="nav-link dropdown-toggle text-white" href="#" id="userDropdown" role="button"
+                                       data-bs-toggle="dropdown" aria-expanded="false">
+                                        @fullName
+                                    </a>
+                                    <ul class="dropdown-menu dropdown-menu-end bg-dark" aria-labelledby="userDropdown">
+                                        <li><a class="dropdown-item text-white" asp-controller="Account" asp-action="Profile">Profil</a></li>
+                                        <li><a class="dropdown-item text-white" asp-controller="Home" asp-action="Favorites">Ulubione</a></li>
+                                        <li><hr class="dropdown-divider bg-secondary" /></li>
+                                        <li>
+                                            <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="dropdown-item text-white">Wyloguj</button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </li>
+
+                                <li class="nav-item d-flex align-items-center d-sm-none">
+                                    <a class="nav-link text-white" asp-controller="Account" asp-action="Profile">@fullName</a>
+                                </li>
+                                <li class="nav-item d-flex align-items-center d-sm-none">
+                                    <a class="nav-link text-white" asp-controller="Home" asp-action="Favorites">Ulubione</a>
+                                </li>
+                                <li class="nav-item d-flex align-items-center d-sm-none">
+                                    <a class="nav-link text-white" asp-controller="Home" asp-action="Koszyk">Koszyk</a>
+                                </li>
+                                <li class="nav-item d-flex align-items-center d-sm-none">
+                                    <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="nav-link text-white btn btn-link p-0 m-0">Wyloguj</button>
+                                    </form>
+                                </li>
+
+                                <li class="nav-item d-none d-sm-flex">
+                                    <a class="nav-link text-white d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Koszyk">
+                                        <i class="bi bi-basket2" style="font-size: 1.5rem;"></i>
+                                    </a>
                                 </li>
                             }
-                            <partial name="_LoginPartial" />
-                            <li class="nav-item">
-                                <a class="nav-link text-white d-flex align-items-center"
-                                   asp-area="" asp-controller="Home" asp-action="Koszyk">
-                                    <i class="bi bi-basket2" style="font-size: 1.5rem;"></i>
-                                </a>
-                            </li>
+                            else
+                            {
+                                <partial name="_LoginPartial" />
+                            }
                         </ul>
                     </div>
                 </div>

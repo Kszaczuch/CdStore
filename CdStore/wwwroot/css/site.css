@@ -114,3 +114,16 @@ body {
         width: 300px;
         height: 300px;
     }
+}
+.card[data-details-url],
+.card[data-details-url] .card-img-top,
+.card[data-details-url] .card-body {
+    cursor: pointer;
+}
+
+.card[data-details-url] a,
+.card[data-details-url] .btn,
+.card[data-details-url] .btn-fav,
+.card[data-details-url] .btn-cart {
+    cursor: default;
+}
