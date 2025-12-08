@@ -3,7 +3,7 @@
     ViewData["Title"] = "Zamówienie";
 }
 
-<h2>Formularz zamówienia</h2>
+<h2 class="text-center">Formularz zamówienia</h2>
 
 <form asp-action="Checkout" method="post">
 
@@ -11,27 +11,27 @@
 
     <div class="row g-3">
         <div class="col-md-6">
-            <label>Imię</label>
-            <input asp-for="FirstName" class="form-control" />
+            <label class="form-label small text-white-50">Imię</label>
+            <input asp-for="FirstName" class="form-control bg-dark text-white" />
         </div>
         <div class="col-md-6">
-            <label>Nazwisko</label>
-            <input asp-for="LastName" class="form-control" />
+            <label class="form-label small text-white-50">Nazwisko</label>
+            <input asp-for="LastName" class="form-control bg-dark text-white" />
         </div>
 
         <div class="col-12">
-            <label>Adres</label>
-            <input asp-for="Address" class="form-control" />
+            <label class="form-label small text-white-50">Adres</label>
+            <input asp-for="Address" class="form-control bg-dark text-white" />
         </div>
 
         <div class="col-md-6">
-            <label>Telefon</label>
-            <input asp-for="Phone" class="form-control" />
+            <label class="form-label small text-white-50">Telefon</label>
+            <input asp-for="Phone" class="form-control bg-dark text-white" />
         </div>
 
         <div class="col-md-6">
-            <label>Email</label>
-            <input asp-for="Email" class="form-control" />
+            <label class="form-label small text-white-50">Email</label>
+            <input asp-for="Email" class="form-control bg-dark text-white" />
         </div>
     </div>
 
@@ -56,5 +56,5 @@
         </tr>
     </table>
 
-    <button class="btn btn-primary">Złóż zamówienie</button>
+    <button class="btn btn-outline-info">Złóż zamówienie</button>
 </form>
