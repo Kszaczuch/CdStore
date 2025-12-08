@@ -4,7 +4,7 @@
     ViewData["Title"] = "Podsumowanie zamówienia";
 }
 
-<h2>Podsumowanie zamówienia</h2>
+<h2 class="text-center">Podsumowanie zamówienia</h2>
 
 <p><strong>Numer zamówienia:</strong> @Model.Id</p>
 <p><strong>Status:</strong> @(Model.IsPaid ? "Opłacone" : "Oczekuje na płatność")</p>
@@ -38,6 +38,9 @@ else
 {
     <a asp-controller="Home" asp-action="Index" class="btn btn-secondary mt-3">
         Powrót do strony głównej
+    </a>
+    <a asp-controller="Account" asp-action="Orders" class="btn btn-info mt-3">
+        Widok zamówień
     </a>
 }
 

@@ -50,7 +50,7 @@
                     </button>
 
                     <a href="/Order/Checkout"
-                       class="btn btn-primary @(isEmpty ? "disabled" : "")"
+                   class="btn @(isEmpty ? "btn-secondary" : "btn-primary") @(isEmpty ? "disabled" : "")"
                        aria-disabled="@(isEmpty.ToString().ToLower())">
                         Przejdź do zamówienia
                     </a>

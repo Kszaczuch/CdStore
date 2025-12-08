@@ -2,9 +2,11 @@
 using CdStore.Services;
 using CdStore.ViewModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 
 namespace CdStore.Controllers
@@ -15,14 +17,33 @@ namespace CdStore.Controllers
         private readonly UserManager<Users> userManager;
         private readonly RoleManager<IdentityRole> roleManager;
         private readonly CartService _cartService;
+        private readonly ApplicationDbContext _context;
         private const string CartCookieName = "CartId";
 
-        public AccountController(SignInManager<Users> signInManager, UserManager<Users> userManager, RoleManager<IdentityRole> roleManager, CartService cartService)
+        public AccountController(SignInManager<Users> signInManager, UserManager<Users> userManager, RoleManager<IdentityRole> roleManager, CartService cartService, ApplicationDbContext context)
         {
             this.signInManager = signInManager;
             this.userManager = userManager;
             this.roleManager = roleManager;
             this._cartService = cartService;
+            this._context = context;
+        }
+
+        private string GetUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        public IActionResult Orders()
+        {
+            var userId = GetUserId();
+            if (userId == null) return Challenge();
+
+            var orders = _context.Orders
+                .Where(o => o.UserId == userId)
+                .Include(o => o.Items)
+                .Include(o => o.Receipt)
+                .OrderByDescending(o => o.CreatedAt)
+                .ToList();
+
+            return View(orders);
         }
 
         [HttpGet]

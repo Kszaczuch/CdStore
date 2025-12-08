@@ -1,0 +1,48 @@
+﻿@model List<CdStore.Models.Order>
+@using CdStore.Models
+
+@{
+    ViewData["Title"] = "Moje zamówienia";
+}
+
+<h2>Moje zamówienia</h2>
+
+<table class="table table-dark table-striped">
+    <thead>
+        <tr>
+            <th>Numer zamówienia</th>
+            <th>Status</th>
+            <th>Data zamówienia</th>
+            <th>Data dostarczenia</th>
+            <th class="text-end">Cena</th>
+        </tr>
+    </thead>
+    <tbody class="text-white">
+        @foreach (var o in Model)
+        {
+            var badgeClass = o.Status switch
+            {
+                OrderStatus.Oczekujace => "badge bg-danger",
+                OrderStatus.Wyslane => "badge bg-warning text-dark",
+                OrderStatus.Dostarczone => "badge bg-success",
+                _ => "badge bg-secondary"
+            };
+
+            <tr>
+                <td>
+                    <a href="@Url.Action("OrderSummary", "Order", new { id = o.Id })">#@o.Id</a>
+                </td>
+                <td>
+                    <span class="@badgeClass">
+                        @(o.Status == OrderStatus.Oczekujace ? "Oczekujące" :
+                                            o.Status == OrderStatus.Wyslane ? "Wysłane" :
+                                            o.Status == OrderStatus.Dostarczone ? "Dostarczone" : o.Status.ToString())
+                </span>
+            </td>
+            <td>@o.CreatedAt.ToLocalTime().ToString("g")</td>
+            <td>@(o.DeliveryDate.HasValue? o.DeliveryDate.Value.ToLocalTime().ToString("g") : "-")</td>
+            <td class="text-end">@o.Total.ToString("C")</td>
+        </tr>
+                }
+    </tbody>
+</table>
