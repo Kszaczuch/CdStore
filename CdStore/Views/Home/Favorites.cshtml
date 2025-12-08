@@ -6,7 +6,12 @@
 }
 
 <div class="container py-4">
-    <h3 class="mb-4">Twoje ulubione</h3>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="mb-0">Twoje ulubione</h3>
+        <button id="move-all-favs" class="btn @(favIds.Any() ? "btn-outline-info" : "btn-secondary") btn-sm" @(favIds.Any() ? "" : "disabled") title="Przenieś wszystkie ulubione do koszyka">
+            Przenieś wszystkie do koszyka
+        </button>
+    </div>
 
     @if (Model == null || !Model.Any())
     {
@@ -81,6 +86,54 @@
                         btn.dataset.inFav = '1';
                         btn.setAttribute('aria-pressed', 'true');
                     }
+                });
+            }
+
+            const moveAllBtn = document.getElementById('move-all-favs');
+
+            if (moveAllBtn) {
+                moveAllBtn.addEventListener('click', async function () {
+                    if (!Array.isArray(preFavs) || preFavs.length === 0) return;
+
+                    moveAllBtn.disabled = true;
+                    const originalText = moveAllBtn.textContent;
+                    moveAllBtn.textContent = 'Przenoszenie...';
+
+                    const idsToMove = preFavs.slice();
+
+                    for (const id of idsToMove) {
+                        try {
+                            if (!preCart.includes(id)) {
+                                const addResp = await fetch('/Home/AddToCart?albumId=' + encodeURIComponent(id), { method: 'POST' });
+                                const addJson = await addResp.json().catch(() => null);
+                                if (addJson && addJson.success) {
+                                    preCart.push(id);
+                                    const cartBtn = document.querySelector('.btn-cart[data-id="' + id + '"]');
+                                    if (cartBtn) {
+                                        cartBtn.textContent = 'W koszyku';
+                                        cartBtn.classList.remove('btn-outline-info');
+                                        cartBtn.classList.add('btn-success');
+                                        cartBtn.dataset.inCart = '1';
+                                    }
+                                }
+                            }
+
+                            const remResp = await fetch('/Home/RemoveFromFavorites?albumId=' + encodeURIComponent(id), { method: 'POST' });
+                            const remJson = await remResp.json().catch(() => null);
+                            if (remJson && remJson.success) {
+                                const favBtn = document.querySelector('.btn-fav[data-id="' + id + '"]');
+                                const card = favBtn ? favBtn.closest('.col') : null;
+                                if (card) card.remove();
+                                const idx = preFavs.indexOf(id);
+                                if (idx !== -1) preFavs.splice(idx, 1);
+                            }
+                        } catch (e) {
+                            console.error('Błąd przy przenoszeniu albumu', id, e);
+                        }
+                    }
+
+                    moveAllBtn.textContent = originalText;
+                    moveAllBtn.disabled = !(Array.isArray(preFavs) && preFavs.length > 0);
                 });
             }
 
