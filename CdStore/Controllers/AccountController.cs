@@ -174,6 +174,8 @@ namespace CdStore.Controllers
             user.UserName = model.Email;
             user.NormalizedEmail = model.Email.ToUpper();
             user.NormalizedUserName = model.Email.ToUpper();
+            user.PhoneNumber = model.PhoneNumber;
+            user.DeliveryAddress = model.DeliveryAddress;
 
             var result = await userManager.UpdateAsync(user);
 
@@ -181,6 +183,38 @@ namespace CdStore.Controllers
             {
                 ViewBag.Message = "Dane zapisano!";
                 return View(user);
+            }
+
+            foreach (var err in result.Errors)
+                ModelState.AddModelError("", err.Description);
+
+            return View(model);
+        }
+
+        [Authorize]
+        [HttpGet]
+        public IActionResult ChangePassword()
+        {
+            return View();
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+            if (!ModelState.IsValid) return View(model);
+
+            var user = await userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Login", "Account");
+
+            var result = await userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+            if (result.Succeeded)
+            {
+                await signInManager.RefreshSignInAsync(user);
+                ViewBag.Message = "Hasło zostało zmienione.";
+                ModelState.Clear();
+                return View();
             }
 
             foreach (var err in result.Errors)

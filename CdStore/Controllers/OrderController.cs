@@ -47,13 +47,22 @@ namespace CdStore.Controllers
                 .Where(a => ids.Contains(a.Id))
                 .ToList();
 
+            var firstName = string.Empty;
+            var lastName = string.Empty;
+            if (user != null && !string.IsNullOrWhiteSpace(user.FullName))
+            {
+                var parts = user.FullName.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+                firstName = parts.Length > 0 ? parts[0] : string.Empty;
+                lastName = parts.Length > 1 ? parts[1] : string.Empty;
+            }
+
             var vm = new CheckoutVm()
             {
-                FirstName = string.Empty,// user.FirstName,
-                LastName = string.Empty, //user.LastName,
-                Address = string.Empty,//user.Address,
-                Phone = user.PhoneNumber,
-                Email = user.Email,
+                FirstName = firstName,
+                LastName = lastName,
+                Address = user?.DeliveryAddress ?? string.Empty,
+                Phone = user?.PhoneNumber,
+                Email = user?.Email,
                 CartItems = items,
                 Total = items.Sum(x => x.Cena)
             };
