@@ -44,9 +44,9 @@ namespace CdStore.Controllers
 
             var vm = new CheckoutVm()
             {
-                FirstName = string.Empty,// user.FirstName,
-                LastName = string.Empty, //user.LastName,
-                Address = string.Empty,//user.Address,
+                FirstName = string.Empty,
+                LastName = string.Empty, 
+                Address = string.Empty,
                 Phone = user.PhoneNumber,
                 Email = user.Email,
                 CartItems = items,
@@ -60,7 +60,6 @@ namespace CdStore.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Checkout(CheckoutVm model)
         {
-            // Reload cart items to redisplay form
             var cartId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? Request.Cookies["CartId"];
             var ids = _cartService.GetCartItems(cartId);
             model.CartItems = _context.Albumy.Where(a => ids.Contains(a.Id)).ToList();
@@ -75,7 +74,6 @@ namespace CdStore.Controllers
             if (!cartItems.Any())
                 return RedirectToAction("Koszyk", "Home");
 
-            // create Order
             var order = new Order
             {
                 UserId = userId,
@@ -134,10 +132,8 @@ namespace CdStore.Controllers
             if (order == null) return NotFound();
             if (order.IsPaid) return Json(new { success = false, msg = "Order already paid." });
 
-            // mark as paid
             order.IsPaid = true;
 
-            // create receipt
             var receipt = new Receipt
             {
                 OrderId = order.Id,
