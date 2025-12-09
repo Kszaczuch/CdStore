@@ -6,5 +6,6 @@ namespace CdStore.Models
     {
         public string FullName { get; set; }
 
+        public bool IsBlocked { get; set; } = false;
     }
 }
