@@ -4,9 +4,9 @@
     ViewData["Title"] = "Wszystkie zamówienia";
 }
 
-<h2>Wszystkie zamówienia</h2>
+<h2 class="text-center">Wszystkie zamówienia</h2>
 
-<table class="table table-striped table-bordered">
+<table class="table table-dark table-striped">
     <thead class="table-dark">
         <tr>
             <th>ID</th>
@@ -18,7 +18,7 @@
             <th></th>
         </tr>
     </thead>
-    <tbody>
+    <tbody class="text-white">
         @foreach (var o in Model)
         {
             <tr>
@@ -27,9 +27,9 @@
                 <td>@o.Email</td>
                 <td>@o.Total zł</td>
                 <td>@o.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
-                <td>@(o.IsPaid ? "✔TAK" : "NIE")</td>
+                <td>@(o.IsPaid ? "TAK" : "NIE")</td>
                 <td>
-                    <a class="btn btn-primary btn-sm"
+                    <a class="btn btn-outline-info btn-sm"
                        asp-action="OrderSummary" asp-route-id="@o.Id">
                         Szczegóły
                     </a>
