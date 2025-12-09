@@ -1,0 +1,63 @@
+﻿@model CdStore.Models.Order
+
+@{
+    ViewData["Title"] = "Podsumowanie zamówienia";
+}
+
+<h2 class="text-center">Podsumowanie zamówienia</h2>
+
+<p><strong>Numer zamówienia:</strong> @Model.Id</p>
+<p><strong>Status:</strong> @(Model.IsPaid ? "Opłacone" : "Oczekuje na płatność")</p>
+
+@if (Model.Receipt != null)
+{
+    <p>
+        <strong>Paragon:</strong> @Model.Receipt.Number
+        <a asp-controller="Order" asp-action="DownloadReceipt" asp-route-id="@Model.Id" class="btn btn-sm btn-outline-primary ms-2">
+            Pobierz paragon
+        </a>
+    </p>
+}
+
+
+<h4>Produkty</h4>
+<table class="table table-dark table-striped">
+    @foreach (var item in Model.Items)
+    {
+        <tr>
+            <td>@item.Album.Tytul – @item.Album.Artysta</td>
+            <td class="text-end">@item.UnitPrice.ToString("C")</td>
+        </tr>
+    }
+    <tr>
+        <th>Razem</th>
+        <th class="text-end">@Model.Total.ToString("C")</th>
+    </tr>
+</table>
+
+@if (!Model.IsPaid)
+{
+    <button id="pay-btn" class="btn btn-success">Opłać zamówienie</button>
+}
+else
+{
+    <a asp-controller="Home" asp-action="Index" class="btn btn-secondary mt-3">
+        Powrót do strony głównej
+    </a>
+    <a asp-controller="Account" asp-action="Orders" class="btn btn-info mt-3">
+        Widok zamówień
+    </a>
+}
+
+@section Scripts {
+    <script>
+        document.getElementById("pay-btn")?.addEventListener("click", () => {
+            fetch('/Order/Pay?id=@Model.Id', { method: 'POST' })
+                .then(r => r.json())
+                .then(j => {
+                    if(j.success) location.reload();
+                    else alert("Błąd: " + j.msg);
+                });
+        });
+    </script>
+}
