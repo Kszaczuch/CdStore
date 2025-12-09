@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -10,6 +11,10 @@ using CdStore.Services;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using CdStore.ViewModels;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
+
 
 namespace CdStore.Controllers
 {
@@ -56,13 +61,23 @@ namespace CdStore.Controllers
                 .Where(a => ids.Contains(a.Id))
                 .ToList();
 
+            var firstName = string.Empty;
+            var lastName = string.Empty;
+            if (user != null && !string.IsNullOrWhiteSpace(user.FullName))
+            {
+                var parts = user.FullName.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+                firstName = parts.Length > 0 ? parts[0] : string.Empty;
+                lastName = parts.Length > 1 ? parts[1] : string.Empty;
+            }
+
             var vm = new CheckoutVm()
             {
-                FirstName = string.Empty,
-                LastName = string.Empty, 
-                Address = string.Empty,
-                Phone = user.PhoneNumber,
-                Email = user.Email,
+
+                FirstName = firstName,
+                LastName = lastName,
+                Address = user?.DeliveryAddress ?? string.Empty,
+                Phone = user?.PhoneNumber,
+                Email = user?.Email,
                 CartItems = items,
                 Total = items.Sum(x => x.Cena)
             };
@@ -201,5 +216,106 @@ namespace CdStore.Controllers
                 ViewBag.User = _context.Users.FirstOrDefault(x => x.Id == userId);
                 return View(orders);
             }
+        }
+
+        [HttpGet]
+        public IActionResult DownloadReceipt(int id)
+        {
+            var order = _context.Orders
+                .Include(o => o.Items)
+                .ThenInclude(i => i.Album)
+                .Include(o => o.Receipt)
+                .FirstOrDefault(o => o.Id == id);
+
+            if (order == null) return NotFound();
+
+            var userId = GetUserId();
+            if (!User.IsInRole("Admin") && order.UserId != userId)
+                return Forbid();
+
+            var receipt = order.Receipt;
+            if (receipt == null) return NotFound();
+
+            var doc = Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4);
+                    page.Margin(20);
+                    page.PageColor(Colors.White);
+                    page.DefaultTextStyle(x => x.FontSize(12));
+
+                    page.Header()
+                        .Text($"Paragon {receipt.Number}")
+                        .FontSize(16)
+                        .SemiBold();
+
+                    page.Content().Column(column =>
+                    {
+                        column.Item().Text($"Data wystawienia: {receipt.IssuedAt.ToLocalTime():g}");
+                        column.Item().Text($"Metoda płatności: {receipt.PaymentMethod}");
+                        column.Item().PaddingVertical(5).LineHorizontal(1);
+
+                        column.Item().Table(table =>
+                        {
+                            table.ColumnsDefinition(columns =>
+                            {
+                                columns.RelativeColumn(); // nazwa
+                                columns.ConstantColumn(60); // ilość
+                                columns.ConstantColumn(90); // cena jedn.
+                                columns.ConstantColumn(90); // razem
+                            });
+
+                            // nagłówki
+                            table.Header(header =>
+                            {
+                                header.Cell().Element(CellStyle).Text("Produkt").SemiBold();
+                                header.Cell().Element(CellStyle).AlignCenter().Text("Ilość").SemiBold();
+                                header.Cell().Element(CellStyle).AlignRight().Text("Cena jedn.").SemiBold();
+                                header.Cell().Element(CellStyle).AlignRight().Text("Razem").SemiBold();
+                            });
+
+                            foreach (var it in order.Items)
+                            {
+                                var title = $"{it.Album?.Tytul ?? "[brak]"} – {it.Album?.Artysta ?? ""}";
+                                table.Cell().Element(CellStyle).Text(title);
+                                table.Cell().Element(CellStyle).AlignCenter().Text(it.Quantity.ToString());
+                                table.Cell().Element(CellStyle).AlignRight().Text(it.UnitPrice.ToString("C"));
+                                table.Cell().Element(CellStyle).AlignRight().Text((it.UnitPrice * it.Quantity).ToString("C"));
+                            }
+
+                            // stopka tabeli
+                            table.Footer(footer =>
+                            {
+                                footer.Cell().ColumnSpan(3).AlignRight().Text("Razem:").SemiBold();
+                                footer.Cell().AlignRight().Text(order.Total.ToString("C")).SemiBold();
+                            });
+
+                            static IContainer CellStyle(IContainer container)
+                            {
+                                return container.PaddingVertical(5).PaddingLeft(2).PaddingRight(2);
+                            }
+                        });
+
+                        column.Item().PaddingTop(10).AlignRight().Text("Dziękujemy za zakupy!").Italic();
+                    });
+
+                    page.Footer()
+                        .AlignCenter()
+                        .Text(text =>
+                        {
+                            // poprawne użycie Text(...) z wywołaniami CurrentPageNumber/TotalPages
+                            text.CurrentPageNumber();
+                            text.Span(" / ");
+                            text.TotalPages();
+                        });
+                });
+            });
+
+            var pdfBytes = doc.GeneratePdf();
+            var fileName = $"Paragon_{receipt.Number}.pdf";
+
+            return File(pdfBytes, "application/pdf", fileName);
+        }
     }
 }

@@ -11,7 +11,12 @@
 
 @if (Model.Receipt != null)
 {
-    <p><strong>Paragon:</strong> @Model.Receipt.Number</p>
+    <p>
+        <strong>Paragon:</strong> @Model.Receipt.Number
+        <a asp-controller="Order" asp-action="DownloadReceipt" asp-route-id="@Model.Id" class="btn btn-sm btn-outline-primary ms-2">
+            Pobierz paragon
+        </a>
+    </p>
 }
 
 
@@ -38,6 +43,9 @@ else
 {
     <a asp-controller="Home" asp-action="Index" class="btn btn-secondary mt-3">
         Powrót do strony głównej
+    </a>
+    <a asp-controller="Account" asp-action="Orders" class="btn btn-info mt-3">
+        Widok zamówień
     </a>
 }
 

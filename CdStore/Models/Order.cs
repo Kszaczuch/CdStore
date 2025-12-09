@@ -25,5 +25,8 @@ namespace CdStore.Models
         public ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();
         public Receipt Receipt { get; set; }
 
+        public OrderStatus Status { get; set; } = OrderStatus.Oczekujace;
+        public DateTime? DeliveryDate { get; set; }
+
     }
 }

@@ -2,11 +2,11 @@
 using CdStore.Services;
 using CdStore.ViewModels;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-
+using System.Security.Claims;
 
 
 namespace CdStore.Controllers
@@ -17,14 +17,33 @@ namespace CdStore.Controllers
         private readonly UserManager<Users> userManager;
         private readonly RoleManager<IdentityRole> roleManager;
         private readonly CartService _cartService;
+        private readonly ApplicationDbContext _context;
         private const string CartCookieName = "CartId";
 
-        public AccountController(SignInManager<Users> signInManager, UserManager<Users> userManager, RoleManager<IdentityRole> roleManager, CartService cartService)
+        public AccountController(SignInManager<Users> signInManager, UserManager<Users> userManager, RoleManager<IdentityRole> roleManager, CartService cartService, ApplicationDbContext context)
         {
             this.signInManager = signInManager;
             this.userManager = userManager;
             this.roleManager = roleManager;
             this._cartService = cartService;
+            this._context = context;
+        }
+
+        private string GetUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        public IActionResult Orders()
+        {
+            var userId = GetUserId();
+            if (userId == null) return Challenge();
+
+            var orders = _context.Orders
+                .Where(o => o.UserId == userId)
+                .Include(o => o.Items)
+                .Include(o => o.Receipt)
+                .OrderByDescending(o => o.CreatedAt)
+                .ToList();
+
+            return View(orders);
         }
 
         [HttpGet]
@@ -178,6 +197,8 @@ namespace CdStore.Controllers
             user.UserName = model.Email;
             user.NormalizedEmail = model.Email.ToUpper();
             user.NormalizedUserName = model.Email.ToUpper();
+            user.PhoneNumber = model.PhoneNumber;
+            user.DeliveryAddress = model.DeliveryAddress;
 
             var result = await userManager.UpdateAsync(user);
 
@@ -185,6 +206,38 @@ namespace CdStore.Controllers
             {
                 ViewBag.Message = "Dane zapisano!";
                 return View(user);
+            }
+
+            foreach (var err in result.Errors)
+                ModelState.AddModelError("", err.Description);
+
+            return View(model);
+        }
+
+        [Authorize]
+        [HttpGet]
+        public IActionResult ChangePassword()
+        {
+            return View();
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+            if (!ModelState.IsValid) return View(model);
+
+            var user = await userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Login", "Account");
+
+            var result = await userManager.ChangePasswordAsync(user, model.CurrentPassword, model.NewPassword);
+            if (result.Succeeded)
+            {
+                await signInManager.RefreshSignInAsync(user);
+                ViewBag.Message = "Hasło zostało zmienione.";
+                ModelState.Clear();
+                return View();
             }
 
             foreach (var err in result.Errors)
