@@ -35,9 +35,23 @@ namespace CdStore.Controllers
             return User.FindFirstValue(ClaimTypes.NameIdentifier);
         }
 
+        private bool IsUserBlocked(string userId)
+        {
+            if (string.IsNullOrEmpty(userId)) return false;
+            var u = _context.Users.Find(userId);
+            return u?.IsBlocked ?? false;
+        }
+
         public IActionResult Checkout()
         {
             var userId = GetUserId();
+
+            if (!string.IsNullOrEmpty(userId) && IsUserBlocked(userId))
+            {
+                TempData["Error"] = "Twoje konto jest zablokowane. Nie możesz składać zamówień.";
+                return RedirectToAction("Koszyk", "Home");
+            }
+
             var user = _context.Users.FirstOrDefault(u => u.Id == userId);
 
             var cartId = userId ?? Request.Cookies["CartId"];
@@ -58,6 +72,7 @@ namespace CdStore.Controllers
 
             var vm = new CheckoutVm()
             {
+
                 FirstName = firstName,
                 LastName = lastName,
                 Address = user?.DeliveryAddress ?? string.Empty,
@@ -74,7 +89,6 @@ namespace CdStore.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Checkout(CheckoutVm model)
         {
-            // Reload cart items to redisplay form
             var cartId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? Request.Cookies["CartId"];
             var ids = _cartService.GetCartItems(cartId);
             model.CartItems = _context.Albumy.Where(a => ids.Contains(a.Id)).ToList();
@@ -89,7 +103,6 @@ namespace CdStore.Controllers
             if (!cartItems.Any())
                 return RedirectToAction("Koszyk", "Home");
 
-            // create Order
             var order = new Order
             {
                 UserId = userId,
@@ -148,10 +161,20 @@ namespace CdStore.Controllers
             if (order == null) return NotFound();
             if (order.IsPaid) return Json(new { success = false, msg = "Order already paid." });
 
-            // mark as paid
+            if (!string.IsNullOrEmpty(order.UserId) && IsUserBlocked(order.UserId))
+            {
+                return Json(new { success = false, msg = "Konto właściciela zamówienia jest zablokowane. Płatność niemożliwa." });
+            }
+
+   
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (!string.IsNullOrEmpty(currentUserId) && IsUserBlocked(currentUserId))
+            {
+                return Json(new { success = false, msg = "Twoje konto jest zablokowane. Nie możesz dokonywać płatności." });
+            }
+
             order.IsPaid = true;
 
-            // create receipt
             var receipt = new Receipt
             {
                 OrderId = order.Id,
@@ -163,6 +186,36 @@ namespace CdStore.Controllers
             _context.SaveChanges();
 
             return Json(new { success = true });
+
+            }
+
+            [Authorize(Roles = "Admin")]
+            public IActionResult AllOrders()
+            {
+                var orders = _context.Orders
+                    .Include(o => o.Items)
+                    .ThenInclude(i => i.Album)
+                    .Include(o => o.User)
+                    .OrderByDescending(o => o.CreatedAt)
+                    .ToList();
+
+                return View(orders);
+            }
+
+
+            [Authorize(Roles = "Admin")]
+            public IActionResult UserOrders(string userId)
+            {
+                var orders = _context.Orders
+                    .Where(o => o.UserId == userId)
+                    .Include(o => o.Items)
+                    .ThenInclude(i => i.Album)
+                    .OrderByDescending(o => o.CreatedAt)
+                    .ToList();
+
+                ViewBag.User = _context.Users.FirstOrDefault(x => x.Id == userId);
+                return View(orders);
+            }
         }
 
         [HttpGet]

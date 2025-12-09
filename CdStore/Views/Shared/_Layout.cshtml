@@ -30,16 +30,30 @@
                         <ul class="navbar-nav d-flex align-items-center">
                             <li class="nav-item">
                                 <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Index">Strona główna</a>
-                                @if (signInManager.IsSignedIn(User) && User.IsInRole("Admin"))
-                                {
-                                <li class="nav-item">
-                                    <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Privacy">Albumy</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Gatunki">Gatunki</a>
-                                </li>
-                            }
                             </li>
+
+                            @if (signInManager.IsSignedIn(User))
+                            {
+                                var currentUser = await userManager.GetUserAsync(User);
+                                var roles = await userManager.GetRolesAsync(currentUser);
+                                if (roles.Contains("Admin"))
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link text-white" asp-controller="Account" asp-action="UsersList">Zarządzanie</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Privacy">Albumy</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link text-white" asp-area="" asp-controller="Home" asp-action="Gatunki">Gatunki</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link text-white" asp-controller="Order" asp-action="AllOrders">Lista zamówień</a>
+                                    </li>
+
+                                }
+
+                            }
                         </ul>
 
                         <ul class="navbar-nav d-flex align-items-center">
@@ -56,6 +70,7 @@
                                     <ul class="dropdown-menu dropdown-menu-end bg-dark" aria-labelledby="userDropdown">
                                         <li><a class="dropdown-item text-white" asp-controller="Account" asp-action="Profile">Profil</a></li>
                                         <li><a class="dropdown-item text-white" asp-controller="Home" asp-action="Favorites">Ulubione</a></li>
+
                                         <li><a class="dropdown-item text-white" asp-controller="Account" asp-action="Orders">Zamówienia</a></li>
                                         <li><hr class="dropdown-divider bg-secondary" /></li>
                                         <li>

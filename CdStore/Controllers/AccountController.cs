@@ -154,12 +154,35 @@ namespace CdStore.Controllers
             return RedirectToAction("Index", "Home");
         }
 
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public async Task<IActionResult> ToggleBlock(string id)
+        {
+            var user = await userManager.FindByIdAsync(id);
+            if (user == null)
+                return NotFound();
+
+            user.IsBlocked = !user.IsBlocked;
+
+            await userManager.UpdateAsync(user);
+
+            return RedirectToAction("UsersList");
+        }
+
         [Authorize]
         [HttpGet]
         public async Task<IActionResult> Profile()
         {
             var user = await userManager.GetUserAsync(User);
             return View(user);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        public IActionResult UsersList()
+        {
+            var users = userManager.Users.ToList();
+            return View(users);
         }
 
         [Authorize]

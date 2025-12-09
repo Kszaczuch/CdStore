@@ -1,0 +1,43 @@
+﻿@model IEnumerable<CdStore.Models.Order>
+
+@{
+    ViewData["Title"] = "Zamówienia użytkownika";
+}
+
+<h2>Zamówienia użytkownika</h2>
+
+@if (!Model.Any())
+{
+    <p>Ten użytkownik nie ma żadnych zamówień.</p>
+}
+else
+{
+    <table class="table table-striped table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Kwota</th>
+                <th>Data</th>
+                <th>Opłacone</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var o in Model)
+            {
+                <tr>
+                    <td>@o.Id</td>
+                    <td>@o.Total zł</td>
+                    <td>@o.CreatedAt.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@(o.IsPaid ? "TAK" : "NIE")</td>
+                    <td>
+                        <a class="btn btn-primary btn-sm"
+                           asp-action="OrderSummary" asp-route-id="@o.Id">
+                            Szczegóły
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

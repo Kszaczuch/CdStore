@@ -5,6 +5,8 @@ namespace CdStore.Models
     public class Users : IdentityUser
     {
         public string FullName { get; set; }
+
+        public bool IsBlocked { get; set; } = false;
         public string DeliveryAddress { get; set; }
     }
 }

@@ -41,10 +41,18 @@ namespace CdStore.Controllers
             return newId;
         }
 
-
+        // Pomocnicza metoda sprawdzaj¹ca czy aktualny u¿ytkownik jest zablokowany
+        private bool IsCurrentUserBlocked()
+        {
+            if (!(User?.Identity?.IsAuthenticated == true)) return false;
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId)) return false;
+            var u = _context.Users.Find(userId);
+            return u?.IsBlocked ?? false;
+        }
 
         [AllowAnonymous]
-        public IActionResult Index(IndexHomeVm model )
+        public IActionResult Index(IndexHomeVm model)
         {
 
             var query = _context.Albumy.Include(a => a.Kategoria).AsQueryable();
@@ -290,12 +298,23 @@ namespace CdStore.Controllers
             var cartId = GetOrCreateCartId();
             var ids = _cartService.GetCartItems(cartId);
             var produkty = _context.Albumy.Where(a => ids.Contains(a.Id)).ToList();
+
+            
+            ViewBag.IsBlocked = IsCurrentUserBlocked();
+            ViewBag.ErrorMessage = TempData["Error"] as string;
+
             return View(produkty);
         }
 
         [HttpPost]
         public IActionResult AddToCart(int albumId)
         {
+           
+            if (User?.Identity?.IsAuthenticated == true && IsCurrentUserBlocked())
+            {
+                return Json(new { success = false, message = "Twoje konto jest zablokowane. Nie mo¿esz dodawaæ produktów do koszyka." });
+            }
+
             var cartId = GetOrCreateCartId();
             var added = _cartService.Add(cartId, albumId);
             return Json(new { success = added });
@@ -320,6 +339,12 @@ namespace CdStore.Controllers
         [HttpPost]
         public IActionResult Buy()
         {
+       
+            if (User?.Identity?.IsAuthenticated == true && IsCurrentUserBlocked())
+            {
+                return Json(new { success = false, message = "Twoje konto jest zablokowane. Nie mo¿esz realizowaæ zakupów." });
+            }
+
             var cartId = GetOrCreateCartId();
             var ids = _cartService.GetCartItems(cartId);
             if (ids == null || !ids.Any())
