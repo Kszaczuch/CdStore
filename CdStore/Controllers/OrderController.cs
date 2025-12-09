@@ -166,7 +166,7 @@ namespace CdStore.Controllers
                 return Json(new { success = false, msg = "Konto właściciela zamówienia jest zablokowane. Płatność niemożliwa." });
             }
 
-   
+
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (!string.IsNullOrEmpty(currentUserId) && IsUserBlocked(currentUserId))
             {
@@ -187,36 +187,36 @@ namespace CdStore.Controllers
 
             return Json(new { success = true });
 
-            }
-
-            [Authorize(Roles = "Admin")]
-            public IActionResult AllOrders()
-            {
-                var orders = _context.Orders
-                    .Include(o => o.Items)
-                    .ThenInclude(i => i.Album)
-                    .Include(o => o.User)
-                    .OrderByDescending(o => o.CreatedAt)
-                    .ToList();
-
-                return View(orders);
-            }
-
-
-            [Authorize(Roles = "Admin")]
-            public IActionResult UserOrders(string userId)
-            {
-                var orders = _context.Orders
-                    .Where(o => o.UserId == userId)
-                    .Include(o => o.Items)
-                    .ThenInclude(i => i.Album)
-                    .OrderByDescending(o => o.CreatedAt)
-                    .ToList();
-
-                ViewBag.User = _context.Users.FirstOrDefault(x => x.Id == userId);
-                return View(orders);
-            }
         }
+
+        [Authorize(Roles = "Admin")]
+        public IActionResult AllOrders()
+        {
+            var orders = _context.Orders
+                .Include(o => o.Items)
+                .ThenInclude(i => i.Album)
+                .Include(o => o.User)
+                .OrderByDescending(o => o.CreatedAt)
+                .ToList();
+
+            return View(orders);
+        }
+
+
+        [Authorize(Roles = "Admin")]
+        public IActionResult UserOrders(string userId)
+        {
+            var orders = _context.Orders
+                .Where(o => o.UserId == userId)
+                .Include(o => o.Items)
+                .ThenInclude(i => i.Album)
+                .OrderByDescending(o => o.CreatedAt)
+                .ToList();
+
+            ViewBag.User = _context.Users.FirstOrDefault(x => x.Id == userId);
+            return View(orders);
+        }
+
 
         [HttpGet]
         public IActionResult DownloadReceipt(int id)
