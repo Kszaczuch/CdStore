@@ -4,7 +4,8 @@
     var cartIds = (ViewBag.CartIds as List<int>) ?? new List<int>();
     var categories = ViewBag.Categories as List<CdStore.Models.Kategoria> ?? new List<CdStore.Models.Kategoria>();
     var favIds = (ViewBag.FavoriteIds as List<int>) ?? new List<int>();
-}<div class="container py-4">
+}
+<div class="container py-4">
     <h3 class="mb-4 text-center">Nasza oferta muzyczna</h3>
 
     <div class="container mb-4">
@@ -112,11 +113,40 @@
     </div>
 </div>
 
+<div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="messageModalLabel">Informacja</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
+            </div>
+            <div class="modal-body" id="messageModalBody"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
         (function () {
             const preselected = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(cartIds ?? new List<int>()));
             const preFavorites = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(favIds ?? new List<int>()));
+
+            function showMessage(title, message) {
+                const modalEl = document.getElementById('messageModal');
+                const titleEl = document.getElementById('messageModalLabel');
+                const bodyEl = document.getElementById('messageModalBody');
+                if (titleEl) titleEl.textContent = title || 'Informacja';
+                if (bodyEl) bodyEl.textContent = message || '';
+                if (typeof bootstrap !== 'undefined') {
+                    const modal = new bootstrap.Modal(modalEl);
+                    modal.show();
+                } else {
+                    alert(message || title || 'Informacja');
+                }
+            }
 
             if (Array.isArray(preselected)) {
                 preselected.forEach(id => {
@@ -170,11 +200,13 @@
                                 } else {
                                     alert('Dodano do koszyka');
                                 }
+                            } else if (j && j.message) {
+                                showMessage('Uwaga', j.message);
                             } else {
-                                alert('Produkt już w koszyku lub wystąpił błąd.');
+                                showMessage('Błąd', 'Produkt już w koszyku lub wystąpił błąd.');
                             }
                         })
-                        .catch(() => alert('Wystąpił błąd podczas dodawania do koszyka.'));
+                        .catch(() => showMessage('Błąd', 'Wystąpił błąd podczas dodawania do koszyka.'));
                     return;
                 }
 
@@ -196,11 +228,13 @@
                                     }
                                     favBtn.setAttribute('data-in-fav', '0');
                                     favBtn.setAttribute('aria-pressed', 'false');
+                                } else if (j && j.message) {
+                                    showMessage('Uwaga', j.message);
                                 } else {
-                                    alert('Nie udało się usunąć z ulubionych.');
+                                    showMessage('Błąd', 'Nie udało się usunąć z ulubionych.');
                                 }
                             })
-                            .catch(() => alert('Wystąpił błąd podczas usuwania z ulubionych.'));
+                            .catch(() => showMessage('Błąd', 'Wystąpił błąd podczas usuwania z ulubionych.'));
                     } else {
                         fetch('/Home/AddToFavorites?albumId=' + encodeURIComponent(id), { method: 'POST' })
                             .then(r => r.json())
@@ -212,11 +246,13 @@
                                     }
                                     favBtn.setAttribute('data-in-fav', '1');
                                     favBtn.setAttribute('aria-pressed', 'true');
+                                } else if (j && j.message) {
+                                    showMessage('Uwaga', j.message);
                                 } else {
-                                    alert('Nie udało się dodać do ulubionych.');
+                                    showMessage('Błąd', 'Nie udało się dodać do ulubionych.');
                                 }
                             })
-                            .catch(() => alert('Wystąpił błąd podczas dodawania do ulubionych.'));
+                            .catch(() => showMessage('Błąd', 'Wystąpił błąd podczas dodawania do ulubionych.'));
                     }
                     return;
                 }

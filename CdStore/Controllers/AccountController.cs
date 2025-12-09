@@ -111,11 +111,11 @@ namespace CdStore.Controllers
 
             var result = await userManager.CreateAsync(user, model.Password);
 
-            if(result.Succeeded)
+            if (result.Succeeded)
             {
                 var roleExist = await roleManager.RoleExistsAsync("User");
 
-                if(!roleExist)
+                if (!roleExist)
                 {
                     var role = new IdentityRole("User");
                     await roleManager.CreateAsync(role);
@@ -139,7 +139,7 @@ namespace CdStore.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            foreach(var error in result.Errors)
+            foreach (var error in result.Errors)
             {
                 ModelState.AddModelError(string.Empty, error.Description);
             }
@@ -156,15 +156,62 @@ namespace CdStore.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleBlock(string id)
         {
             var user = await userManager.FindByIdAsync(id);
             if (user == null)
                 return NotFound();
 
-            user.IsBlocked = !user.IsBlocked;
+            if (await userManager.IsInRoleAsync(user, "Admin"))
+            {
+                TempData["Error"] = "Nie można zablokować użytkownika będącego administratorem. Najpierw usuń rolę Admin.";
+                return RedirectToAction("UsersList");
+            }
 
+            user.IsBlocked = !user.IsBlocked;
             await userManager.UpdateAsync(user);
+
+            return RedirectToAction("UsersList");
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> MakeAdmin(string id)
+        {
+            var user = await userManager.FindByIdAsync(id);
+            if (user == null)
+                return NotFound();
+
+            if (!await roleManager.RoleExistsAsync("Admin"))
+            {
+                await roleManager.CreateAsync(new IdentityRole("Admin"));
+            }
+
+            var result = await userManager.AddToRoleAsync(user, "Admin");
+            if (result.Succeeded)
+            {
+                if (user.IsBlocked)
+                {
+                    user.IsBlocked = false;
+                    await userManager.UpdateAsync(user);
+                }
+            }
+
+            return RedirectToAction("UsersList");
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemoveAdmin(string id)
+        {
+            var user = await userManager.FindByIdAsync(id);
+            if (user == null)
+                return NotFound();
+
+            await userManager.RemoveFromRoleAsync(user, "Admin");
 
             return RedirectToAction("UsersList");
         }

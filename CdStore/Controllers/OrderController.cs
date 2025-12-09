@@ -147,6 +147,10 @@ namespace CdStore.Controllers
 
             if (order == null) return NotFound();
 
+            var currentUserId = GetUserId();
+            if (!User.IsInRole("Admin") && order.UserId != currentUserId)
+                return NotFound();
+
             return View(order);
         }
 
@@ -202,19 +206,53 @@ namespace CdStore.Controllers
             return View(orders);
         }
 
-
         [Authorize(Roles = "Admin")]
-        public IActionResult UserOrders(string userId)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ChangeStatus(int id, string status)
         {
-            var orders = _context.Orders
-                .Where(o => o.UserId == userId)
-                .Include(o => o.Items)
-                .ThenInclude(i => i.Album)
-                .OrderByDescending(o => o.CreatedAt)
-                .ToList();
+            var order = _context.Orders.FirstOrDefault(o => o.Id == id);
+            if (order == null) return NotFound();
 
-            ViewBag.User = _context.Users.FirstOrDefault(x => x.Id == userId);
-            return View(orders);
+            if (string.IsNullOrWhiteSpace(status))
+            {
+                TempData["Error"] = "Nieprawidłowy status.";
+                return RedirectToAction("AllOrders");
+            }
+
+            if (!TryMapStringToStatus(status, out var newStatus))
+            {
+                TempData["Error"] = "Nieprawidłowy status.";
+                return RedirectToAction("AllOrders");
+            }
+
+            order.Status = newStatus;
+            _context.SaveChanges();
+
+            return RedirectToAction("AllOrders");
+        }
+
+        private bool TryMapStringToStatus(string s, out OrderStatus status)
+        {
+            status = OrderStatus.Oczekujace;
+            if (string.IsNullOrWhiteSpace(s)) return false;
+
+            switch (s.Trim().ToLowerInvariant())
+            {
+                case "oczekujace":
+                case "oczekujące":
+                    status = OrderStatus.Oczekujace;
+                    return true;
+                case "wyslane":
+                case "wysłane":
+                    status = OrderStatus.Wyslane;
+                    return true;
+                case "dostarczone":
+                    status = OrderStatus.Dostarczone;
+                    return true;
+                default:
+                    return false;
+            }
         }
 
 
@@ -304,7 +342,6 @@ namespace CdStore.Controllers
                         .AlignCenter()
                         .Text(text =>
                         {
-                            // poprawne użycie Text(...) z wywołaniami CurrentPageNumber/TotalPages
                             text.CurrentPageNumber();
                             text.Span(" / ");
                             text.TotalPages();
