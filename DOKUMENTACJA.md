@@ -245,7 +245,80 @@ return File(pdfBytes, "application/pdf", fileName);
 }
 ```
 
-<p>Gdzie: appsettings.json — connection string jest odczytywany w Program.cs i przekazywany do DbContext.</p>
+<h2>Spis funkcji — kontrolery i serwisy</h2>
+
+<p>Poniżej znajduje się lista publicznych akcji i istotnych helperów w głównych kontrolerach i serwisie CartService wraz z krótkimi opisami działania.</p>
+
+<h3>AccountController</h3>
+<ul>
+  <li><strong>GetUserId()</strong> (private) — pobiera Id zalogowanego użytkownika z Claimów.</li>
+  <li><strong>Orders()</strong> — (GET) zwraca listę zamówień aktualnego użytkownika (Include Items, Receipt); Challenge() gdy brak logowania.</li>
+  <li><strong>Login()</strong> — (GET) widok logowania.</li>
+  <li><strong>Login(LoginViewModel)</strong> — (POST) loguje użytkownika; przy sukcesie scala anonimowy koszyk (cookie) z koszykiem użytkownika i usuwa cookie; zwraca błędy w ModelState przy niepowodzeniu.</li>
+  <li><strong>Register()</strong> — (GET) widok rejestracji.</li>
+  <li><strong>Register(RegisterViewModel)</strong> — (POST) tworzy konto Users, tworzy rolę "User" jeśli brak, przypisuje rolę, loguje użytkownika i scala anonimowy koszyk; obsługuje błędy tworzenia.</li>
+  <li><strong>Logout()</strong> — (POST) wylogowuje użytkownika i przekierowuje na Home.</li>
+  <li><strong>ToggleBlock(string id)</strong> — (POST, Admin) przełącza IsBlocked dla użytkownika; nie pozwala zablokować Admina.</li>
+  <li><strong>MakeAdmin(string id)</strong> — (POST, Admin) tworzy rolę Admin (jeśli brak) i nadaje ją użytkownikowi; odblokowuje użytkownika jeśli był zablokowany.</li>
+  <li><strong>RemoveAdmin(string id)</strong> — (POST, Admin) usuwa rolę Admin z użytkownika.</li>
+  <li><strong>Profile()</strong> — (GET, Authorize) widok profilu aktualnego użytkownika.</li>
+  <li><strong>UsersList()</strong> — (GET, Admin) lista wszystkich użytkowników.</li>
+  <li><strong>Profile(Users model)</strong> — (POST) aktualizuje dane aktualnego użytkownika (FullName, Email, Phone, DeliveryAddress) i zapisuje zmiany.</li>
+  <li><strong>ChangePassword()</strong> — (GET) widok zmiany hasła.</li>
+  <li><strong>ChangePassword(ChangePasswordViewModel)</strong> — (POST) zmienia hasło i odświeża sesję (RefreshSignInAsync); obsługuje błędy.</li>
+</ul>
+
+<h3>HomeController</h3>
+<ul>
+  <li><strong>GetOrCreateCartId()</strong> (private) — zwraca cartId: userId jeśli zalogowany, wpp. cookie CartId; tworzy cookie gdy brak.</li>
+  <li><strong>IsCurrentUserBlocked()</strong> (private) — sprawdza flagę IsBlocked aktualnego użytkownika w DB.</li>
+  <li><strong>Index(IndexHomeVm)</strong> — (AllowAnonymous) ładuje listę albumów z filtrami (kategoria, dostępność), sortowaniem, kategorie, ulubione i identyfikatory w koszyku.</li>
+  <li><strong>Detale(int id)</strong> — (AllowAnonymous) ładuje szczegóły albumu i przygotowuje dane koszyka oraz ulubionych.</li>
+  <li><strong>Regulamin(), PolitykaPrywatnosci()</strong> — (AllowAnonymous) statyczne strony informacyjne.</li>
+  <li><strong>Privacy(int? id)</strong> — (Admin) panel admina do przeglądu i edycji produktów; ładuje albumy i kategorie.</li>
+  <li><strong>SaveProductForm(Album model)</strong> — (POST, Admin) tworzy lub aktualizuje album; parsuje cenę, normalizuje opis i zapisuje zmiany.</li>
+  <li><strong>DeleteProductForm(int id)</strong> — (POST, Admin) usuwa album.</li>
+  <li><strong>Gatunki(int? id)</strong> — (Admin) widok listy kategorii.</li>
+  <li><strong>SaveCategoryForm(Kategoria model)</strong> — (POST, Admin) tworzy lub aktualizuje kategorię.</li>
+  <li><strong>DeleteCategoryForm(int id)</strong> — (POST, Admin) usuwa kategorię.</li>
+  <li><strong>Koszyk()</strong> — pokazuje zawartość koszyka: pobiera szczegóły z CartService, przygotowuje mapę ilości i flagę IsBlocked.</li>
+  <li><strong>AddToCart(int albumId, int quantity = 1)</strong> — (POST) dodaje pozycję do koszyka przez CartService; sprawdza blokadę konta; zwraca JSON { success }.</li>
+  <li><strong>RemoveFromCart(int albumId)</strong> — (POST) usuwa pozycję przez CartService; zwraca JSON.</li>
+  <li><strong>ClearCart()</strong> — (POST) czyści koszyk przez CartService; zwraca JSON.</li>
+  <li><strong>Buy()</strong> — (POST) realizuje szybką finalizację zakupu: waliduje dostępność i limity (max 5), zmniejsza IloscNaStanie, zapisuje zmiany i czyści koszyk; zwraca JSON z wynikiem.</li>
+  <li><strong>UpdateCartQuantity(int albumId, int quantity)</strong> — (POST) ustawia ilość przez CartService.SetQuantity (ogranicza do maxAllowed), oblicza subtotal i total i zwraca JSON.</li>
+  <li><strong>Favorites()</strong> — lista ulubionych zalogowanego użytkownika, wraz z danymi koszyka.</li>
+  <li><strong>AddToFavorites(int albumId)</strong> — (POST) dodaje wpis Favorite, jeśli użytkownik zalogowany i wpis nie istnieje; zwraca JSON.</li>
+  <li><strong>RemoveFromFavorites(int albumId)</strong> — (POST) usuwa wpis Favorite; zwraca JSON.</li>
+  <li><strong>Error()</strong> — widok błędu z RequestId.</li>
+</ul>
+
+<h3>OrderController</h3>
+<ul>
+  <li><strong>GetUserId()</strong> (private) — pobiera Id użytkownika z Claimów.</li>
+  <li><strong>IsUserBlocked(string userId)</strong> (private) — sprawdza flagę IsBlocked dla podanego userId.</li>
+  <li><strong>Checkout()</strong> — (GET, Authorize) przygotowuje CheckoutVm: ładuje zawartość koszyka, mapę ilości, dane użytkownika i oblicza total; przy zablokowanym koncie przekierowuje do Koszyk z TempData error.</li>
+  <li><strong>Checkout(CheckoutVm model)</strong> — (POST) waliduje koszyk i dostępność, tworzy Order i OrderItemy, zmniejsza stany magazynowe, zapisuje do DB i czyści koszyk; przekierowuje do OrderSummary.</li>
+  <li><strong>OrderSummary(int id)</strong> — ładuje zamówienie (Items -> Album, Receipt) i sprawdza uprawnienia (właściciel lub admin); zwraca widok podsumowania.</li>
+  <li><strong>Pay(int id, string method = "Card")</strong> — (POST) weryfikuje własność i blokady, oznacza zamówienie jako opłacone, tworzy Receipt i zapisuje; zwraca JSON (symulacja płatności).</li>
+  <li><strong>AllOrders()</strong> — (Admin) zwraca listę wszystkich zamówień (Items->Album, User) posortowanych malejąco.</li>
+  <li><strong>ChangeStatus(int id, string status)</strong> — (POST, Admin) mapuje tekstowy status na enum OrderStatus i aktualizuje order.Status; przy Dostarczone ustawia DeliveryDate.</li>
+  <li><strong>TryMapStringToStatus(string s, out OrderStatus status)</strong> (private) — pomocnik mapujący polski tekst na OrderStatus.</li>
+  <li><strong>DownloadReceipt(int id)</strong> — (GET) generuje PDF paragonu przy użyciu QuestPDF i zwraca plik; sprawdza uprawnienia (właściciel lub admin).</li>
+</ul>
+
+<h3>CartService</h3>
+<ul>
+  <li><strong>CartService(ApplicationDbContext)</strong> — konstruktor (DI kontekstu).</li>
+  <li><strong>Add(string cartId, int albumId, int quantity = 1)</strong> — dodaje pozycję do koszyka lub zwiększa ilość; waliduje cartId, quantity, istnienie albumu; stosuje maxAllowed = min(5, IloscNaStanie); zapisuje do DB i zwraca bool sukcesu.</li>
+  <li><strong>Remove(string cartId, int albumId)</strong> — usuwa wpisy CartItem dla danego cartId i albumId; zapisuje zmiany.</li>
+  <li><strong>GetCartItems(string cartId)</strong> — zwraca listę albumId z koszyka (distinct), tylko quantity &gt; 0.</li>
+  <li><strong>GetCartItemsDetailed(string cartId)</strong> — zwraca listę CartItem; przed zwróceniem usuwa wpisy z quantity &lt;= 0 i zapisuje zmiany, potem zwraca aktualne wpisy.</li>
+  <li><strong>SetQuantity(string cartId, int albumId, int quantity)</strong> — ustawia ilość pozycji (usuwa gdy &lt;=0), stosuje ograniczenie do maxAllowed, zapisuje i zwraca bool.</li>
+  <li><strong>Clear(string cartId)</strong> — usuwa wszystkie wpisy danego cartId i zapisuje zmiany.</li>
+</ul>
+
+<p><em>Uwagi:</em> Metody modyfikujące stan magazynowy i tworzące zamówienia wykonują SaveChanges() bez explicite transakcji. W środowisku o dużej współbieżności rozważ użycie transakcji DB lub mechanizmów kontroli współbieżności.</p>
 
 <h2>Operacje użytkownika — krok po kroku (bez kodu)</h2>
 
