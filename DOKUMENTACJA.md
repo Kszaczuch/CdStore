@@ -42,6 +42,8 @@ CdStore to prosty sklep internetowy z płytami CD zbudowany w ASP.NET Core Razor
 
 <h3>1) Program.cs — rejestracja DbContext i Identity</h3>
 
+<p>Krótkie wyjaśnienie: Ten fragment pokazuje rejestrację usług aplikacji w kontenerze DI. DbContext konfiguruje połączenie do bazy danych, a Identity rejestruje mechanizmy uwierzytelniania i przechowywanie użytkowników w EF. CartService i SeedService są dodawane jako serwisy aplikacyjne.</p>
+
 ```csharp
 // ...typowy fragment z Program.cs
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -59,7 +61,11 @@ builder.Services.AddScoped<CartService>();
 builder.Services.AddScoped<SeedService>();
 ```
 
+<p>Gdzie jest używane: Kod znajduje się w Program.cs i wykonuje się podczas uruchamiania aplikacji. Dzięki temu kontrolery i strony otrzymują zainicjowane instancje serwisów przez DI.</p>
+
 <h3>2) ApplicationDbContext (ważne mapowania i DbSety)</h3>
+
+<p>Krótkie wyjaśnienie: ApplicationDbContext to klasa pochodna IdentityDbContext, która definiuje zestawy tabel (DbSet) dla encji aplikacji. Metoda OnModelCreating służy do dodatkowej konfiguracji modelu (relacje, indeksy, ograniczenia).</p>
 
 ```csharp
 public class ApplicationDbContext : IdentityDbContext<Users>
@@ -82,7 +88,11 @@ public class ApplicationDbContext : IdentityDbContext<Users>
 }
 ```
 
+<p>Gdzie jest używane: ApplicationDbContext jest wstrzykiwany do serwisów i kontrolerów tam, gdzie potrzebny jest dostęp do bazy danych (np. SeedService, kontrolery zamówień, serwis koszyka).</p>
+
 <h3>3) Model Users (rozszerzony IdentityUser)</h3>
+
+<p>Krótkie wyjaśnienie: Klasa Users rozszerza IdentityUser, dodając pola specyficzne dla aplikacji (FullName, IsBlocked, DeliveryAddress). Pole IsBlocked pozwala na implementację mechanizmu blokowania konta na poziomie logiki aplikacji.</p>
 
 ```csharp
 public class Users : IdentityUser
@@ -97,7 +107,11 @@ public class Users : IdentityUser
 }
 ```
 
+<p>Gdzie jest używane: Ten model jest używany przez Identity oraz wszędzie, gdzie potrzebne są dodatkowe informacje o użytkowniku (Profile, Orders, Checkout).</p>
+
 <h3>4) Przykład użycia CartService w kontrolerze/home</h3>
+
+<p>Krótkie wyjaśnienie: Przykład ilustruje prostą integrację serwisu koszyka w kontrolerze. Metoda AddToCart wywołuje metodę serwisu odpowiedzialną za dodanie pozycji do koszyka, a następnie przekierowuje użytkownika.</p>
 
 ```csharp
 public class HomeController : Controller
@@ -117,7 +131,11 @@ public class HomeController : Controller
 }
 ```
 
+<p>Gdzie jest używane: HomeController (lub inny kontroler) wstrzykuje CartService przez DI. CartService realizuje logikę dodawania, usuwania i pobierania zawartości koszyka.</p>
+
 <h3>5) Tworzenie zamówienia (schematycznie)</h3>
+
+<p>Krótkie wyjaśnienie: Fragment pokazuje podstawowy przepływ tworzenia zamówienia z zawartości koszyka: pobranie koszyka, utworzenie obiektu Order, zapis do kontekstu i zapis do bazy.</p>
 
 ```csharp
 // OrderController
@@ -128,7 +146,11 @@ _context.Orders.Add(order);
 await _context.SaveChangesAsync();
 ```
 
+<p>Gdzie jest używane: Logika tworzenia zamówienia znajduje się w OrderController lub w dedykowanym serwisie zamówień; powinna też tworzyć rekordy OrderItem na podstawie pozycji z koszyka.</p>
+
 <h3>6)Konfiguracja bazy danych — przykładowy connection string (appsettings.json)</h3>
+
+<p>Krótkie wyjaśnienie: Connection string określa serwer bazy danych, nazwę bazy oraz sposób uwierzytelniania. Poniższy przykład używa instancji SQL Server Express i uwierzytelnienia Windows (Trusted Connection).</p>
 
 ```json
 {
@@ -137,6 +159,8 @@ await _context.SaveChangesAsync();
   }
 }
 ```
+
+<p>Gdzie jest używane: Connection string jest odczytywany w Program.cs i przekazywany do konfiguracji DbContext, aby aplikacja mogła łączyć się z bazą danych.</p>
 
 <h2>Jak połączyć projekt w Visual Studio z Microsoft SQL Server Express</h2>
 
