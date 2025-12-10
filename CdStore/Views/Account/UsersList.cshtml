@@ -8,6 +8,10 @@
     <div class="alert alert-danger">@TempData["Error"]</div>
 }
 
+@{ 
+    var currentUserId = userManager.GetUserId(User);
+}
+
 <table class="table table-dark table-striped">
     <thead>
         <tr>
@@ -33,11 +37,18 @@
                     <div class="d-flex flex-row flex-wrap align-items-center gap-2">
                         @if (isAdmin)
                         {
-                            <form asp-action="RemoveAdmin" method="post" class="m-0">
-                                @Html.AntiForgeryToken()
-                                <input type="hidden" name="id" value="@u.Id" />
-                                <button type="submit" class="btn btn-danger" title="Usuń uprawnienia admina">Usuń admina</button>
-                            </form>
+                            if (u.Id != currentUserId)
+                            {
+                                <form asp-action="RemoveAdmin" method="post" class="m-0">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@u.Id" />
+                                    <button type="submit" class="btn btn-danger" title="Usuń uprawnienia admina">Usuń admina</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <button class="btn btn-secondary" disabled title="Nie możesz usunąć uprawnień admina od siebie">Usuń admina</button>
+                            }
                         }
                         else
                         {
