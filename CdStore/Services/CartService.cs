@@ -53,7 +53,7 @@ namespace CdStore.Services
         {
             if (string.IsNullOrEmpty(cartId)) return new List<int>();
             return _db.CartItems
-                      .Where(ci => ci.CartId == cartId)
+                      .Where(ci => ci.CartId == cartId && ci.Quantity > 0)
                       .Select(ci => ci.AlbumId)
                       .Distinct()
                       .ToList();
@@ -62,9 +62,23 @@ namespace CdStore.Services
         public List<CartItem> GetCartItemsDetailed(string cartId)
         {
             if (string.IsNullOrEmpty(cartId)) return new List<CartItem>();
-            return _db.CartItems
-                      .Where(ci => ci.CartId == cartId)
-                      .ToList();
+
+            var items = _db.CartItems
+                           .Where(ci => ci.CartId == cartId)
+                           .ToList();
+
+            var invalid = items.Where(i => i.Quantity <= 0).ToList();
+            if (invalid.Any())
+            {
+                _db.CartItems.RemoveRange(invalid);
+                _db.SaveChanges();
+
+                items = _db.CartItems
+                           .Where(ci => ci.CartId == cartId)
+                           .ToList();
+            }
+
+            return items;
         }
 
         public bool SetQuantity(string cartId, int albumId, int quantity)
