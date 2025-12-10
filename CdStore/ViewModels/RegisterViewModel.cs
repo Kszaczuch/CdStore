@@ -5,11 +5,13 @@ namespace CdStore.ViewModels
     public class RegisterViewModel
     {
         [Required(ErrorMessage = "Nazwa jest wymagana")]
+        [MaxLength(200)]
 
         public string Name { get; set; }
 
         [Required(ErrorMessage = "Email jest wymagany")]
         [EmailAddress]
+        [MaxLength(200)]
 
         public string Email { get; set; }
 
