@@ -253,68 +253,51 @@ return File(pdfBytes, "application/pdf", fileName);
 
 <h3>Rejestracja konta</h3>
 <p>Co robi: Tworzy nowe konto użytkownika. Wypełnij formularz rejestracji (Email, Hasło, Imię i nazwisko) i zatwierdź. Po rejestracji konto jest utworzone i użytkownik może się zalogować.</p>
-<p><img src="/img/screenshots/register.png" alt="Formularz rejestracji" /></p>
+<p><img src="wwwroot/img/screenshots/register.png" alt="Formularz rejestracji" /></p>
 
 <h3>Logowanie</h3>
 <p>Co robi: Uwierzytelnia użytkownika. Wypełnij formularz logowania (Email, Hasło) i zatwierdź, aby uzyskać dostęp do konta i funkcji chronionych.</p>
-<p><img src="/img/screenshots/login.png" alt="Formularz logowania" /></p>
-<p>Ścieżka do obrazu: wwwroot/img/screenshots/login.png</p>
+<p><img src="wwwroot/img/screenshots/login.png" alt="Formularz logowania" /></p>
 
 <h3>Zmiana danych osobowych</h3>
 <p>Co robi: Pozwala użytkownikowi zaktualizować swoje dane (FullName, DeliveryAddress, Phone). Przejdź do profilu i edytuj pola, a następnie zapisz zmiany.</p>
-<p><img src="/img/screenshots/profile.png" alt="Formularz profilu" /></p>
-<p>Ścieżka do obrazu: wwwroot/img/screenshots/profile.png</p>
+<p><img src="wwwroot/img/screenshots/profile.png" alt="Formularz profilu" /></p>
 
 <h3>Przeglądanie katalogu</h3>
 <p>Co robi: Przeglądaj listę albumów, filtruj i sortuj według kategorii lub ceny. Kliknij album, aby zobaczyć szczegóły i okładkę.</p>
-<p><img src="/img/screenshots/album-details.png" alt="Szczegóły albumu" /></p>
-<p>Ścieżka do obrazu: wwwroot/img/screenshots/album-details.png</p>
+<p><img src="wwwroot/img/screenshots/album-details.png" alt="Szczegóły albumu" /></p>
 
 <h3>Dodanie albumu do koszyka</h3>
 <p>Co robi: Dodaje wybrany album do koszyka. Użyj przycisku "Do koszyka" na karcie albumu lub na stronie szczegółów.</p>
-<p><img src="/img/screenshots/add-to-cart.png" alt="Dodaj do koszyka" /></p>
-<p>Ścieżka do obrazu: wwwroot/img/screenshots/add-to-cart.png</p>
+<p><img src="wwwroot/img/screenshots/add-to-cart.png" alt="Dodaj do koszyka" /></p>
 
 <h3>Zarządzanie koszykiem</h3>
 <p>Co robi: Pokazuje zawartość koszyka, pozwala zmienić ilości i usuwać pozycje. Przejdź do widoku Koszyk, aby zaktualizować zawartość przed checkout.</p>
-<p><img src="/img/screenshots/cart.png" alt="Widok koszyka" /></p>
-<p>Ścieżka do obrazu: wwwroot/img/screenshots/cart.png</p>
+<p><img src="wwwroot/img/screenshots/cart.png" alt="Widok koszyka" /></p>
 
 <h3>Checkout / Złożenie zamówienia</h3>
 <p>Co robi: Wprowadź dane dostawy i zatwierdź zamówienie. System tworzy zamówienie (Order) i pozycje (OrderItem), rezerwuje stany magazynowe i czyści koszyk.</p>
-<p><img src="/img/screenshots/checkout.png" alt="Podsumowanie zamówienia" /></p>
-<p>Ścieżka do obrazu: wwwroot/img/screenshots/checkout.png</p>
+<p><img src="wwwroot/img/screenshots/checkout.png" alt="Podsumowanie zamówienia" /></p>
 
 <h3>Opłacenie zamówienia</h3>
 <p>Co robi: Po potwierdzeniu płatności zamówienie jest oznaczane jako opłacone, a system generuje paragon (Receipt). Integracja z bramką płatności wymaga konfiguracji zewnętrznej.</p>
-<p><img src="/img/screenshots/payment.png" alt="Proces płatności" /></p>
-<p>Ścieżka do obrazu: wwwroot/img/screenshots/payment.png</p>
+<p><img src="wwwroot/img/screenshots/payment.png" alt="Proces płatności" /></p>
 
 <h3>Pobranie paragonu</h3>
 <p>Co robi: Umożliwia pobranie paragonu w formacie PDF z widoku szczegółów zamówienia. Kliknij "Pobierz paragon" i otrzymasz plik PDF generowany przez QuestPDF.</p>
-<p><img src="/img/screenshots/receipt.png" alt="Pobierz paragon" /></p>
-<p>Ścieżka do obrazu: wwwroot/img/screenshots/receipt.png</p>
+<p><img src="wwwroot/img/screenshots/receipt.png" alt="Pobierz paragon" /></p>
 
 <h3>Dodawanie / edycja albumu i gatunku (Admin)</h3>
 <p>Co robi: W panelu administracyjnym możesz dodać nowy album lub gatunek (kategorie) oraz edytować istniejące wpisy. Formularze admina umożliwiają ustawienie tytułu, artysty, ceny, ilości na stanie i linku do okładki.</p>
-<p><img src="/img/screenshots/admin-albums.png" alt="Panel admin - albumy" /></p>
-<p>Ścieżka do obrazu: wwwroot/img/screenshots/admin-albums.png</p>
+<p><img src="wwwroot/img/screenshots/admin-albums.png" alt="Panel admin - albumy" /></p>
 
 <h3>Blokowanie / odblokowywanie użytkownika (Admin)</h3>
 <p>Co robi: Na liście użytkowników możesz zablokować konto, ustawiając flagę IsBlocked; zablokowany użytkownik nie może składać zamówień ani wykonywać płatności. Możesz również przywrócić konto ustawiając IsBlocked = false.</p>
-<p><img src="/img/screenshots/admin-users.png" alt="Panel admin - użytkownicy" /></p>
-<p>Ścieżka do obrazu: wwwroot/img/screenshots/admin-users.png</p>
+<p><img src="wwwroot/img/screenshots/admin-users.png" alt="Panel admin - użytkownicy" /></p>
 
 <h3>Zarządzanie zamówieniami (Admin)</h3>
 <p>Co robi: Panel administracyjny pokazuje wszystkie zamówienia; możesz filtrować po statusie i zmieniać statusy (np. oczekujące, wysłane, dostarczone). Możesz też pobierać paragon klienta lub generować notatki wysyłkowe.</p>
-<p><img src="/img/screenshots/admin-orders.png" alt="Panel admin - zamówienia" /></p>
-<p>Ścieżka do obrazu: wwwroot/img/screenshots/admin-orders.png</p>
-
-<p>Instrukcja dodawania obrazków w dokumentacji:</p>
-<!-- Przykład znacznika: <a href="/Home/Detale/1"><img src="/img/covers/okladka.jpg" alt="Okładka albumu" /></a>
-     Ścieżka do folderu obrazków w projekcie: wwwroot/img/ (np. wwwroot/img/screenshots/register.png lub wwwroot/img/covers/okladka.jpg) -->
-
-<p>Uwaga: Pliki obrazów umieszczaj w katalogu wwwroot/img/ i odwołuj się do nich ścieżką względną zaczynając od /img/ (np. /img/screenshots/register.png).</p>
+<p><img src="wwwroot/img/screenshots/admin-orders.png" alt="Panel admin - zamówienia" /></p>
 
 <h2>Uwagi końcowe</h2>
 
