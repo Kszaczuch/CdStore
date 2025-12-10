@@ -12,5 +12,7 @@ namespace CdStore.Models
 
         [Required]
         public int AlbumId { get; set; }
+
+        public int Quantity { get; set; } = 1;
     }
 }

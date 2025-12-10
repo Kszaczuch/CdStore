@@ -1,130 +1,139 @@
-﻿    @model List<CdStore.Models.Album>
-    @{
-        ViewData["Title"] = "Koszyk";
-        decimal total = Model?.Sum(a => a.Cena) ?? 0m;
-        var isEmpty = Model == null || !Model.Any();
-    }
+﻿@model List<CdStore.Models.Album>
+@{
+    ViewData["Title"] = "Koszyk";
+    var cartQuantities = ViewBag.CartQuantities as Dictionary<int, int> ?? new Dictionary<int, int>();
+    decimal total = Model?.Sum(a => a.Cena * (cartQuantities.ContainsKey(a.Id) ? cartQuantities[a.Id] : 1)) ?? 0m;
+    var isEmpty = Model == null || !Model.Any();
+}
 
-    <div class="text-center">
-        <h3 class="display-5 fw-bold">Koszyk</h3>
-        <br />
-        <div class="table-responsive">
-            <table class="table table-dark table-striped align-middle">
-                <thead>
-                    <tr>
-                        <th class="text-start" style="width:90px"></th>
-                        <th class="text-center">Nazwa</th>
-                        <th class="text-end" style="width:100px">Cena</th>
-                        <th class="text-end" style="width:100px"></th>
+<div class="text-center">
+    <h3 class="display-5 fw-bold">Koszyk</h3>
+    <br />
+    <div class="table-responsive">
+        <table class="table table-dark table-striped align-middle" id="cart-table">
+            <thead>
+                <tr>
+                    <th class="text-start" style="width:90px"></th>
+                    <th class="text-center">Nazwa</th>
+                    <th class="text-end" style="width:100px">Cena</th>
+                    <th class="text-end" style="width:100px">Ilość</th>
+                    <th class="text-end" style="width:120px">Razem</th>
+                    <th class="text-end" style="width:100px"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var a in Model)
+                {
+                    var qty = cartQuantities.ContainsKey(a.Id) ? cartQuantities[a.Id] : 1;
+                    var max = Math.Min(5, a.IloscNaStanie);
+                    <tr data-id="@a.Id">
+                        <td class="text-start">
+                            <img class="img-fluid square-img rounded"
+                                 src="@a.OkladkaLink"
+                                 alt="@a.Tytul"
+                                 style="max-width: 80px; height: auto;" />
+                        </td>
+                        <td class="text-center">@a.Tytul - @a.Artysta</td>
+                        <td class="text-end price">@a.Cena.ToString("C")</td>
+                        <td class="text-end">
+                            <input type="number" class="form-control qty-input d-inline-block text-end bg-dark text-white" value="@qty" min="1" max="@max" style="width:80px;" data-id="@a.Id" />
+                        </td>
+                        <td class="text-end subtotal">@((a.Cena * qty).ToString("C"))</td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-outline-danger remove-btn" data-id="@a.Id">Usuń</button>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    @foreach (var a in Model)
-                    {
-                        <tr>
-                            <td class="text-start">
-                                <img class="img-fluid square-img rounded"
-                                     src="@a.OkladkaLink"
-                                     alt="@a.Tytul"
-                                     style="max-width: 80px; height: auto;" />
-                            </td>
-                            <td class="text-center">@a.Tytul - @a.Artysta</td>
-                            <td class="text-end">@a.Cena.ToString("C")</td>
-                            <td class="text-end">
-                                <button class="btn btn-sm btn-outline-danger remove-btn" data-id="@a.Id">Usuń</button>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-            <div class="d-flex flex-wrap justify-content-between align-items-center mt-3">
-                <div class="mb-2 mb-md-0">
-                    <h5>Całkowity koszt: @total.ToString("C")</h5>
-                </div>
-                <div class="d-flex flex-wrap gap-2">
-                    <button id="clear-cart-btn"
-                            class="btn @(isEmpty ? "btn-secondary" : "btn-danger")"
-                            @(isEmpty ? "disabled" : "")
-                            aria-disabled="@(isEmpty.ToString().ToLower())">
-                        Usuń wszystko
-                    </button>
+                }
+            </tbody>
+        </table>
+        <div class="d-flex flex-wrap justify-content-between align-items-center mt-3">
+            <div class="mb-2 mb-md-0">
+                <h5>Całkowity koszt: <span id="cart-total">@total.ToString("C")</span></h5>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <button id="clear-cart-btn"
+                        class="btn @(isEmpty ? "btn-secondary" : "btn-danger")"
+                        @(isEmpty ? "disabled" : "")
+                        aria-disabled="@(isEmpty.ToString().ToLower())">
+                    Usuń wszystko
+                </button>
 
-                    <a href="/Order/Checkout"
+                <a href="/Order/Checkout"
                    class="btn @(isEmpty ? "btn-secondary" : "btn-primary") @(isEmpty ? "disabled" : "")"
-                       aria-disabled="@(isEmpty.ToString().ToLower())">
-                        Przejdź do zamówienia
-                    </a>
-                </div>
+                   aria-disabled="@(isEmpty.ToString().ToLower())">
+                    Przejdź do zamówienia
+                </a>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="modal fade" id="buyModal" tabindex="-1" aria-labelledby="buyModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="buyModalLabel">Kupiono produkty</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zamknij"></button>
-                </div>
-                <div class="modal-body">
-                    Dziękujemy — zakup zakończony pomyślnie.
-                </div>
-                <div class="modal-footer">
-                    <button id="buy-ok-btn" type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
-                </div>
-            </div>
-        </div>
-    </div>
+@section Scripts {
+    <script>
+        (function () {
+            function updateQuantity(albumId, qty, row) {
+                fetch('/Home/UpdateCartQuantity?albumId=' + encodeURIComponent(albumId) + '&quantity=' + encodeURIComponent(qty), { method: 'POST' })
+                    .then(r => r.json())
+                    .then(j => {
+                        if (j && j.success) {
+                            row.querySelector('.subtotal').textContent = j.subtotal;
+                            document.getElementById('cart-total').textContent = j.total;
+                        } else {
+                            alert(j && j.message ? j.message : 'Błąd przy aktualizacji ilości.');
+                            location.reload();
+                        }
+                    })
+                    .catch(() => {
+                        alert('Wystąpił błąd przy aktualizacji ilości.');
+                        location.reload();
+                    });
+            }
 
-    @section Scripts {
-        <script>
-            (function () {
-                document.addEventListener('click', function (e) {
-                    const btn = e.target;
-                    if (!btn) return;
+            function debounce(fn, ms) {
+                let t;
+                return function (...args) {
+                    clearTimeout(t);
+                    t = setTimeout(() => fn.apply(this, args), ms);
+                };
+            }
 
-                    if (btn.classList.contains('remove-btn')) {
-                        const id = btn.getAttribute('data-id');
-                        if (!id) return;
+            const debouncedUpdate = debounce((albumId, qty, row) => updateQuantity(albumId, qty, row), 400);
 
-                        fetch('/Home/RemoveFromCart?albumId=' + encodeURIComponent(id), { method: 'POST' })
-                            .then(r => r.json())
-                            .then(() => location.reload())
-                            .catch(() => alert('Wystąpił błąd przy usuwaniu produktu.'));
-                    }
-                });
+            document.addEventListener('click', function (e) {
+                const btn = e.target;
+                if (!btn) return;
 
-                document.getElementById('clear-cart-btn')?.addEventListener('click', function () {
-                    if (!confirm('Na pewno wyczyścić koszyk?')) return;
-                    fetch('/Home/ClearCart', { method: 'POST' })
+                if (btn.classList.contains('remove-btn')) {
+                    const id = btn.getAttribute('data-id');
+                    if (!id) return;
+
+                    fetch('/Home/RemoveFromCart?albumId=' + encodeURIComponent(id), { method: 'POST' })
                         .then(r => r.json())
                         .then(() => location.reload())
-                        .catch(() => alert('Wystąpił błąd przy czyszczeniu koszyka.'));
-                });
+                        .catch(() => alert('Wystąpił błąd przy usuwaniu produktu.'));
+                }
+            });
 
-                document.getElementById('buy-btn')?.addEventListener('click', function () {
-                    fetch('/Home/Buy', { method: 'POST' })
-                        .then(r => r.json())
-                        .then(j => {
-                            if (j && j.success) {
-                                const modalEl = document.getElementById('buyModal');
-                                if (typeof bootstrap !== 'undefined') {
-                                    const modal = new bootstrap.Modal(modalEl);
-                                    modal.show();
+            document.getElementById('clear-cart-btn')?.addEventListener('click', function () {
+                if (!confirm('Na pewno wyczyścić koszyk?')) return;
+                fetch('/Home/ClearCart', { method: 'POST' })
+                    .then(r => r.json())
+                    .then(() => location.reload())
+                    .catch(() => alert('Wystąpił błąd przy czyszczeniu koszyka.'));
+            });
 
-                                    document.getElementById('buy-ok-btn')?.addEventListener('click', function () {
-                                        window.location.href = '/';
-                                    });
-                                } else {
-                                    alert('Kupiono produkty');
-                                    window.location.href = '/';
-                                }
-                            } else {
-                                alert('Nie udało się zrealizować zakupu.');
-                            }
-                        })
-                        .catch(() => alert('Wystąpił błąd przy realizacji zakupu.'));
+            document.querySelectorAll('.qty-input').forEach(input => {
+                input.addEventListener('input', function () {
+                    const albumId = this.getAttribute('data-id');
+                    let qty = parseInt(this.value) || 1;
+                    const max = parseInt(this.getAttribute('max')) || 5;
+                    if (qty < 1) qty = 1;
+                    if (qty > max) qty = max;
+                    this.value = qty;
+                    const row = this.closest('tr');
+                    debouncedUpdate(albumId, qty, row);
                 });
-            })();
-        </script>
-    }
+            });
+        })();
+    </script>
+}

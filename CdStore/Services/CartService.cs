@@ -12,14 +12,30 @@ namespace CdStore.Services
             _db = db;
         }
 
-        public bool Add(string cartId, int albumId)
+        public bool Add(string cartId, int albumId, int quantity = 1)
         {
             if (string.IsNullOrEmpty(cartId)) return false;
+            if (quantity <= 0) return false;
 
-            var exists = _db.CartItems.Any(ci => ci.CartId == cartId && ci.AlbumId == albumId);
-            if (exists) return false;
+            var album = _db.Albumy.Find(albumId);
+            if (album == null) return false;
 
-            _db.CartItems.Add(new CartItem { CartId = cartId, AlbumId = albumId });
+            var maxAllowed = Math.Min(5, album.IloscNaStanie);
+            if (maxAllowed <= 0) return false;
+
+            var existing = _db.CartItems.FirstOrDefault(ci => ci.CartId == cartId && ci.AlbumId == albumId);
+            if (existing == null)
+            {
+                var qty = Math.Min(quantity, maxAllowed);
+                _db.CartItems.Add(new CartItem { CartId = cartId, AlbumId = albumId, Quantity = qty });
+            }
+            else
+            {
+                var newQty = existing.Quantity + quantity;
+                existing.Quantity = Math.Min(newQty, maxAllowed);
+                _db.CartItems.Update(existing);
+            }
+
             _db.SaveChanges();
             return true;
         }
@@ -41,6 +57,40 @@ namespace CdStore.Services
                       .Select(ci => ci.AlbumId)
                       .Distinct()
                       .ToList();
+        }
+
+        public List<CartItem> GetCartItemsDetailed(string cartId)
+        {
+            if (string.IsNullOrEmpty(cartId)) return new List<CartItem>();
+            return _db.CartItems
+                      .Where(ci => ci.CartId == cartId)
+                      .ToList();
+        }
+
+        public bool SetQuantity(string cartId, int albumId, int quantity)
+        {
+            if (string.IsNullOrEmpty(cartId)) return false;
+
+            var item = _db.CartItems.FirstOrDefault(ci => ci.CartId == cartId && ci.AlbumId == albumId);
+            if (item == null) return false;
+
+            var album = _db.Albumy.Find(albumId);
+            if (album == null) return false;
+
+            var maxAllowed = Math.Min(5, album.IloscNaStanie);
+
+            if (quantity <= 0)
+            {
+                _db.CartItems.Remove(item);
+            }
+            else
+            {
+                item.Quantity = Math.Min(quantity, Math.Max(1, maxAllowed));
+                _db.CartItems.Update(item);
+            }
+
+            _db.SaveChanges();
+            return true;
         }
 
         public void Clear(string cartId)

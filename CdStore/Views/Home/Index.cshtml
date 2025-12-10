@@ -4,6 +4,9 @@
     var cartIds = (ViewBag.CartIds as List<int>) ?? new List<int>();
     var categories = ViewBag.Categories as List<CdStore.Models.Kategoria> ?? new List<CdStore.Models.Kategoria>();
     var favIds = (ViewBag.FavoriteIds as List<int>) ?? new List<int>();
+
+    var cartJson = System.Text.Json.JsonSerializer.Serialize(cartIds);
+    var favJson = System.Text.Json.JsonSerializer.Serialize(favIds);
 }
 <div class="container py-4">
     <h3 class="mb-4 text-center">Nasza oferta muzyczna</h3>
@@ -131,8 +134,8 @@
 @section Scripts {
     <script>
         (function () {
-            const preselected = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(cartIds ?? new List<int>()));
-            const preFavorites = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(favIds ?? new List<int>()));
+            const preselected = @Html.Raw(cartJson);
+            const preFavorites = @Html.Raw(favJson);
 
             function showMessage(title, message) {
                 const modalEl = document.getElementById('messageModal');
