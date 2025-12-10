@@ -339,8 +339,7 @@ return File(pdfBytes, "application/pdf", fileName);
 
 <h3>Zarządzanie zamówieniami</h3>
 <p>Ten panel administracyjny pokazuje wszystkie zamówienia; można filtrować po statusie i zmieniać statusy (np. oczekujące, wysłane, dostarczone). Można też zobaczyć szczegóły zamówienia klienta gdzie jets możliwość pobrania paragonu.</p>
-<p><img src="wwwroot/img/screenshots/admin-orders.png" alt="Panel admin - zamówienia" /></p>
-<p>Aby przejść do panelu zamówień należy rozwinąć listę w lewym górnym rogu ekranu i kliknąć przycisk "Zamówienia"</p>
+<p>Aby przejść do panelu zamówień należy rozwinąć listę w lewym górnym rogu ekranu i kliknąć przycisk "Lista zamówień"</p>
 <p><img src="wwwroot/img/screenshots/Strona-glowna-admin-zamowienia.png" alt="Panel zarządzania zamówieniami na stronie głównej" /></p>
 <p>Aby zmienić status zamówienia należy wybrać jedną z opcji w liście rozwijanej po prawej stronie tabeli</p>
 <p><img src="wwwroot/img/screenshots/Zamowienia-admin-status.png" alt="Zmiana statusu zamówienia" /></p>
