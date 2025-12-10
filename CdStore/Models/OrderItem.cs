@@ -15,8 +15,10 @@ namespace CdStore.Models
         public int AlbumId { get; set; }
         public Album Album { get; set; }
 
-        public int Quantity { get; set; }
+        [Range(1, int.MaxValue)]
+        public int Quantity { get; set; } = 1;
 
+        [Range(0, 100000)]
         public decimal UnitPrice { get; set; }
 
         [NotMapped]

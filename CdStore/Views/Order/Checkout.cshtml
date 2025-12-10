@@ -5,7 +5,10 @@
 
 <h2 class="text-center">Formularz zamówienia</h2>
 
-<form asp-action="Checkout" method="post">
+<form asp-action="Checkout" method="post" novalidate>
+    @Html.AntiForgeryToken()
+
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
     <h4>Dane dostawy</h4>
 
@@ -13,25 +16,30 @@
         <div class="col-md-6">
             <label class="form-label small text-white-50">Imię</label>
             <input asp-for="FirstName" class="form-control bg-dark text-white" />
+            <span asp-validation-for="FirstName" class="text-danger"></span>
         </div>
         <div class="col-md-6">
             <label class="form-label small text-white-50">Nazwisko</label>
             <input asp-for="LastName" class="form-control bg-dark text-white" />
+            <span asp-validation-for="LastName" class="text-danger"></span>
         </div>
 
         <div class="col-12">
             <label class="form-label small text-white-50">Adres</label>
             <input asp-for="Address" class="form-control bg-dark text-white" />
+            <span asp-validation-for="Address" class="text-danger"></span>
         </div>
 
         <div class="col-md-6">
             <label class="form-label small text-white-50">Telefon</label>
             <input asp-for="Phone" class="form-control bg-dark text-white" />
+            <span asp-validation-for="Phone" class="text-danger"></span>
         </div>
 
         <div class="col-md-6">
             <label class="form-label small text-white-50">Email</label>
             <input asp-for="Email" class="form-control bg-dark text-white" />
+            <span asp-validation-for="Email" class="text-danger"></span>
         </div>
     </div>
 
@@ -39,22 +47,37 @@
 
     <h4>Podsumowanie koszyka</h4>
     <table class="table table-dark table-striped">
-        <tr>
-            <th>Produkt</th>
-            <th class="text-end">Cena</th>
-        </tr>
-        @foreach (var a in Model.CartItems)
-        {
+        <thead>
             <tr>
-                <td>@a.Tytul – @a.Artysta</td>
-                <td class="text-end">@a.Cena.ToString("C")</td>
+                <th>Produkt</th>
+                <th class="text-center" style="width:90px">Ilość</th>
+                <th class="text-end" style="width:120px">Cena jedn.</th>
+                <th class="text-end" style="width:140px">Razem</th>
             </tr>
-        }
-        <tr>
-            <th>Suma</th>
-            <th class="text-end">@Model.Total.ToString("C")</th>
-        </tr>
+        </thead>
+        <tbody>
+            @foreach (var a in Model.CartItems)
+            {
+                var qty = Model.Quantities != null && Model.Quantities.ContainsKey(a.Id) ? Model.Quantities[a.Id] : 1;
+                <tr>
+                    <td>@a.Tytul – @a.Artysta</td>
+                    <td class="text-center">@qty</td>
+                    <td class="text-end">@a.Cena.ToString("C")</td>
+                    <td class="text-end">@((a.Cena * qty).ToString("C"))</td>
+                </tr>
+            }
+            <tr>
+                <th colspan="3">Suma</th>
+                <th class="text-end">@Model.Total.ToString("C")</th>
+            </tr>
+        </tbody>
     </table>
 
-    <button class="btn btn-outline-info">Złóż zamówienie</button>
+    <button type="submit" class="btn btn-outline-info">Złóż zamówienie</button>
 </form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial.cshtml");
+    }
+}

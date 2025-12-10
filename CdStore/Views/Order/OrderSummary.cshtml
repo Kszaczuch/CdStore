@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Podsumowanie zamówienia";
 }
+@using System.Security.Claims
 
 <h2 class="text-center">Podsumowanie zamówienia</h2>
 
@@ -19,45 +20,90 @@
     </p>
 }
 
-
 <h4>Produkty</h4>
 <table class="table table-dark table-striped">
-    @foreach (var item in Model.Items)
-    {
+    <thead>
         <tr>
-            <td>@item.Album.Tytul – @item.Album.Artysta</td>
-            <td class="text-end">@item.UnitPrice.ToString("C")</td>
+            <th>Produkt</th>
+            <th class="text-center" style="width:90px">Ilość</th>
+            <th class="text-end" style="width:120px">Cena jedn.</th>
+            <th class="text-end" style="width:140px">Razem</th>
         </tr>
-    }
-    <tr>
-        <th>Razem</th>
-        <th class="text-end">@Model.Total.ToString("C")</th>
-    </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Items)
+        {
+            var title = $"{item.Album?.Tytul ?? "[brak]"} – {item.Album?.Artysta ?? ""}";
+            var lineTotal = item.UnitPrice * item.Quantity;
+            <tr>
+                <td>@title</td>
+                <td class="text-center">@item.Quantity</td>
+                <td class="text-end">@item.UnitPrice.ToString("C")</td>
+                <td class="text-end">@lineTotal.ToString("C")</td>
+            </tr>
+        }
+        <tr>
+            <th colspan="3">Razem</th>
+            <th class="text-end">@Model.Total.ToString("C")</th>
+        </tr>
+    </tbody>
 </table>
+
+@{
+    var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    var isAdmin = User.IsInRole("Admin");
+    var isOwner = Model.UserId == currentUserId;
+}
 
 @if (!Model.IsPaid)
 {
-    <button id="pay-btn" class="btn btn-success">Opłać zamówienie</button>
+    if (isOwner)
+    {
+        <button id="pay-btn" class="btn btn-success">Opłać zamówienie</button>
+    }
+    else if (isAdmin && !isOwner)
+    {
+        <a asp-controller="Order" asp-action="AllOrders" class="btn btn-secondary">Powrót do listy zamówień</a>
+    }
+    else
+    {
+        <p class="text-danger">Nie masz dostępu do tego zamówienia.</p>
+    }
 }
 else
 {
     <a asp-controller="Home" asp-action="Index" class="btn btn-secondary mt-3">
         Powrót do strony głównej
     </a>
-    <a asp-controller="Account" asp-action="Orders" class="btn btn-info mt-3">
-        Widok zamówień
-    </a>
+
+    @if (isAdmin)
+    {
+        <a asp-controller="Order" asp-action="AllOrders" class="btn btn-info mt-3">
+            Lista zamówień
+        </a>
+    }
+    else
+    {
+        <a asp-controller="Account" asp-action="Orders" class="btn btn-info mt-3">
+            Widok zamówień
+        </a>
+    }
 }
 
 @section Scripts {
     <script>
         document.getElementById("pay-btn")?.addEventListener("click", () => {
+            if (!confirm('Opłacić zamówienie?')) return;
             fetch('/Order/Pay?id=@Model.Id', { method: 'POST' })
                 .then(r => r.json())
                 .then(j => {
-                    if(j.success) location.reload();
-                    else alert("Błąd: " + j.msg);
-                });
+                    if (j && j.success) {
+                        location.reload();
+                    } else {
+                        alert(j && j.msg ? j.msg : 'Błąd płatności.');
+                    }
+                })
+                .catch(() => alert('Wystąpił błąd podczas realizacji płatności.'));
         });
     </script>
 }

@@ -21,6 +21,7 @@ namespace CdStore.Models
         public Order Order { get; set; }
 
         [Required]
+        [MaxLength(100)]
         public string Number { get; set; }
 
         public DateTime IssuedAt { get; set; } = DateTime.UtcNow;

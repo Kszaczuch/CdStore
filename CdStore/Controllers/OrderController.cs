@@ -55,11 +55,14 @@ namespace CdStore.Controllers
             var user = _context.Users.FirstOrDefault(u => u.Id == userId);
 
             var cartId = userId ?? Request.Cookies["CartId"];
-            var ids = _cartService.GetCartItems(cartId);
+            var cartDetailed = _cartService.GetCartItemsDetailed(cartId);
+            var ids = cartDetailed.Select(ci => ci.AlbumId).ToList();
 
             var items = _context.Albumy
                 .Where(a => ids.Contains(a.Id))
                 .ToList();
+
+            var qtyMap = cartDetailed.ToDictionary(ci => ci.AlbumId, ci => ci.Quantity);
 
             var firstName = string.Empty;
             var lastName = string.Empty;
@@ -72,14 +75,14 @@ namespace CdStore.Controllers
 
             var vm = new CheckoutVm()
             {
-
                 FirstName = firstName,
                 LastName = lastName,
                 Address = user?.DeliveryAddress ?? string.Empty,
                 Phone = user?.PhoneNumber,
                 Email = user?.Email,
                 CartItems = items,
-                Total = items.Sum(x => x.Cena)
+                Quantities = qtyMap,
+                Total = items.Sum(x => x.Cena * (qtyMap.ContainsKey(x.Id) ? qtyMap[x.Id] : 1))
             };
 
             return View(vm);
@@ -90,18 +93,31 @@ namespace CdStore.Controllers
         public IActionResult Checkout(CheckoutVm model)
         {
             var cartId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? Request.Cookies["CartId"];
-            var ids = _cartService.GetCartItems(cartId);
-            model.CartItems = _context.Albumy.Where(a => ids.Contains(a.Id)).ToList();
-            model.Total = model.CartItems.Sum(x => x.Cena);
+            var cartDetailed = _cartService.GetCartItemsDetailed(cartId);
+            var ids = cartDetailed.Select(ci => ci.AlbumId).ToList();
 
+            model.CartItems = _context.Albumy.Where(a => ids.Contains(a.Id)).ToList();
+            model.Quantities = cartDetailed.ToDictionary(ci => ci.AlbumId, ci => ci.Quantity);
+            model.Total = model.CartItems.Sum(x => x.Cena * (model.Quantities.ContainsKey(x.Id) ? model.Quantities[x.Id] : 1));
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var cartId2 = userId ?? Request.Cookies["CartId"];
-            var ids2 = _cartService.GetCartItems(cartId2);
-            var cartItems = _context.Albumy.Where(a => ids2.Contains(a.Id)).ToList();
+            var ids2Detailed = _cartService.GetCartItemsDetailed(cartId2);
+            var cartItems = _context.Albumy.Where(a => ids2Detailed.Select(ci => ci.AlbumId).Contains(a.Id)).ToList();
 
             if (!cartItems.Any())
                 return RedirectToAction("Koszyk", "Home");
+
+            foreach (var ci in ids2Detailed)
+            {
+                var album = cartItems.FirstOrDefault(a => a.Id == ci.AlbumId);
+                if (album == null) continue;
+                if (ci.Quantity <= 0 || ci.Quantity > 5 || ci.Quantity > album.IloscNaStanie)
+                {
+                    TempData["Error"] = $"Nieprawidłowa ilość dla produktu {album.Tytul}.";
+                    return RedirectToAction("Koszyk", "Home");
+                }
+            }
 
             var order = new Order
             {
@@ -113,19 +129,20 @@ namespace CdStore.Controllers
                 Email = model.Email,
                 CreatedAt = DateTime.UtcNow,
                 IsPaid = false,
-                Total = cartItems.Sum(x => x.Cena)
+                Total = cartItems.Sum(a => a.Cena * (ids2Detailed.First(ci => ci.AlbumId == a.Id).Quantity))
             };
 
             foreach (var album in cartItems)
             {
+                var qty = ids2Detailed.First(ci => ci.AlbumId == album.Id).Quantity;
                 order.Items.Add(new OrderItem
                 {
                     AlbumId = album.Id,
-                    Quantity = 1,
+                    Quantity = qty,
                     UnitPrice = album.Cena
                 });
 
-                album.IloscNaStanie--;
+                album.IloscNaStanie -= qty;
             }
 
             _context.Orders.Add(order);
@@ -170,8 +187,16 @@ namespace CdStore.Controllers
                 return Json(new { success = false, msg = "Konto właściciela zamówienia jest zablokowane. Płatność niemożliwa." });
             }
 
-
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (order.UserId != currentUserId)
+            {
+                if (User.IsInRole("Admin"))
+                    return Json(new { success = false, msg = "Administrator nie może opłacać cudzych zamówień." });
+                else
+                    return Json(new { success = false, msg = "Nie masz dostępu do tego zamówienia." });
+            }
+
             if (!string.IsNullOrEmpty(currentUserId) && IsUserBlocked(currentUserId))
             {
                 return Json(new { success = false, msg = "Twoje konto jest zablokowane. Nie możesz dokonywać płatności." });
@@ -227,6 +252,16 @@ namespace CdStore.Controllers
             }
 
             order.Status = newStatus;
+
+            if (newStatus == OrderStatus.Dostarczone)
+            {
+                order.DeliveryDate = DateTime.UtcNow;
+            }
+            else
+            {
+                order.DeliveryDate = null;
+            }
+
             _context.SaveChanges();
 
             return RedirectToAction("AllOrders");

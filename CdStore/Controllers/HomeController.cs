@@ -41,7 +41,6 @@ namespace CdStore.Controllers
             return newId;
         }
 
-        // Pomocnicza metoda sprawdzaj¹ca czy aktualny u¿ytkownik jest zablokowany
         private bool IsCurrentUserBlocked()
         {
             if (!(User?.Identity?.IsAuthenticated == true)) return false;
@@ -296,10 +295,13 @@ namespace CdStore.Controllers
         public IActionResult Koszyk()
         {
             var cartId = GetOrCreateCartId();
-            var ids = _cartService.GetCartItems(cartId);
+            var cartDetailed = _cartService.GetCartItemsDetailed(cartId);
+            var ids = cartDetailed.Select(ci => ci.AlbumId).ToList();
             var produkty = _context.Albumy.Where(a => ids.Contains(a.Id)).ToList();
 
-            
+            var quantities = cartDetailed.ToDictionary(ci => ci.AlbumId, ci => ci.Quantity);
+
+            ViewBag.CartQuantities = quantities;
             ViewBag.IsBlocked = IsCurrentUserBlocked();
             ViewBag.ErrorMessage = TempData["Error"] as string;
 
@@ -307,16 +309,15 @@ namespace CdStore.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddToCart(int albumId)
+        public IActionResult AddToCart(int albumId, int quantity = 1)
         {
-           
             if (User?.Identity?.IsAuthenticated == true && IsCurrentUserBlocked())
             {
                 return Json(new { success = false, message = "Twoje konto jest zablokowane. Nie mo¿esz dodawaæ produktów do koszyka." });
             }
 
             var cartId = GetOrCreateCartId();
-            var added = _cartService.Add(cartId, albumId);
+            var added = _cartService.Add(cartId, albumId, quantity);
             return Json(new { success = added });
         }
 
@@ -339,36 +340,85 @@ namespace CdStore.Controllers
         [HttpPost]
         public IActionResult Buy()
         {
-       
             if (User?.Identity?.IsAuthenticated == true && IsCurrentUserBlocked())
             {
                 return Json(new { success = false, message = "Twoje konto jest zablokowane. Nie mo¿esz realizowaæ zakupów." });
             }
 
             var cartId = GetOrCreateCartId();
-            var ids = _cartService.GetCartItems(cartId);
-            if (ids == null || !ids.Any())
+
+            var cartDetailed = _cartService.GetCartItemsDetailed(cartId);
+
+            if (cartDetailed == null || !cartDetailed.Any())
                 return Json(new { success = false, message = "Koszyk jest pusty." });
 
-            var albumy = _context.Albumy.Where(a => ids.Contains(a.Id)).ToList();
-            var outOfStock = albumy.Where(a => a.IloscNaStanie <= 0).ToList();
+            var albumIds = cartDetailed.Select(ci => ci.AlbumId).ToList();
+            var albumy = _context.Albumy.Where(a => albumIds.Contains(a.Id)).ToList();
+
+            var outOfStock = new List<string>();
+            foreach (var ci in cartDetailed)
+            {
+                var alb = albumy.FirstOrDefault(a => a.Id == ci.AlbumId);
+                if (alb == null) { outOfStock.Add($"#{ci.AlbumId} (brak produktu)"); continue; }
+                if (ci.Quantity <= 0) { outOfStock.Add($"{alb.Tytul} - nieprawid³owa iloœæ"); continue; }
+                if (ci.Quantity > 5) { outOfStock.Add($"{alb.Tytul} - wiêcej ni¿ 5"); continue; }
+                if (ci.Quantity > alb.IloscNaStanie) { outOfStock.Add($"{alb.Tytul} - dostêpne: {alb.IloscNaStanie}"); }
+            }
 
             if (outOfStock.Any())
             {
-                var names = outOfStock.Select(a => $"{a.Tytul} - {a.Artysta}");
-                return Json(new { success = false, message = "Brak dostêpnoœci: " + string.Join(", ", names) });
+                return Json(new { success = false, message = "Problem z dostêpnoœci¹: " + string.Join(", ", outOfStock) });
             }
 
-            foreach (var a in albumy)
+            foreach (var ci in cartDetailed)
             {
-                if (a.IloscNaStanie > 0)
-                    a.IloscNaStanie--;
+                var alb = albumy.FirstOrDefault(a => a.Id == ci.AlbumId);
+                if (alb != null && alb.IloscNaStanie >= ci.Quantity)
+                {
+                    alb.IloscNaStanie -= ci.Quantity;
+                }
             }
 
             _context.SaveChanges();
 
             _cartService.Clear(cartId);
             return Json(new { success = true });
+        }
+
+        [HttpPost]
+        public IActionResult UpdateCartQuantity(int albumId, int quantity)
+        {
+            var cartId = GetOrCreateCartId();
+            var album = _context.Albumy.Find(albumId);
+            if (album == null)
+                return Json(new { success = false, message = "Produkt nie istnieje." });
+
+            var maxAllowed = Math.Min(5, album.IloscNaStanie);
+            if (quantity < 1) quantity = 1;
+            if (quantity > maxAllowed) quantity = maxAllowed;
+
+            var ok = _cartService.SetQuantity(cartId, albumId, quantity);
+            if (!ok)
+                return Json(new { success = false, message = "Nie uda³o siê zaktualizowaæ koszyka." });
+
+            var cartDetailed = _cartService.GetCartItemsDetailed(cartId);
+            var albumIds = cartDetailed.Select(ci => ci.AlbumId).ToList();
+            var albums = _context.Albumy.Where(a => albumIds.Contains(a.Id)).ToList();
+
+            var subtotal = album.Cena * quantity;
+            var total = albums.Sum(a =>
+            {
+                var q = cartDetailed.FirstOrDefault(ci => ci.AlbumId == a.Id)?.Quantity ?? 1;
+                return a.Cena * q;
+            });
+
+            return Json(new
+            {
+                success = true,
+                quantity = quantity,
+                subtotal = subtotal.ToString("C"),
+                total = total.ToString("C")
+            });
         }
 
         public IActionResult Favorites()
