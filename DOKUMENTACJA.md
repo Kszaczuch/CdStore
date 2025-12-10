@@ -1,46 +1,46 @@
-DOKUMENTACJA projektu CdStore
+<h1 align="center">DOKUMENTACJA projektu CdStore</h1>
 
-Ogólny opis
+<h2>OgÃ³lny opis</h2>
 
-CdStore to prosty sklep internetowy z muzyk¹ (p³yty/albumy) zbudowany w ASP.NET Core Razor Pages / MVC (razor views) na platformie .NET 8. Projekt wykorzystuje Identity do obs³ugi u¿ytkowników, Entity Framework Core do warstwy dostêpu do danych oraz migracje EF do zarz¹dzania schematem bazy danych. Zawiera mechanikê koszyka, zamówieñ, ulubionych, panel konta oraz proste zarz¹dzanie u¿ytkownikami.
+CdStore to prosty sklep internetowy z pÅ‚ytami CD zbudowany w ASP.NET Core Razor Pages / MVC (razor views) na platformie .NET 8. Projekt wykorzystuje Identity do obsÅ‚ugi uÅ¼ytkownikÃ³w, Entity Framework Core do warstwy dostÄ™pu do danych oraz migracje EF do zarzÄ…dzania schematem bazy danych. Zawiera mechanikÄ™ koszyka, zamÃ³wieÅ„, ulubionych, panel konta oraz proste zarzÄ…dzanie uÅ¼ytkownikami.
 
-Wymagania
+<h3>Wymagania</h3>
 
 - .NET 8 SDK
 - SQL Server (lub inny provider skonfigurowany w appsettings.json)
 - Dotnet-ef (opcjonalnie, do stosowania migracji lokalnie)
 
-Struktura projektu (najwa¿niejsze pliki i katalogi)
+<h3>Struktura projektu (najwaÅ¼niejsze pliki i katalogi)</h3>
 
-- Program.cs — konfiguracja aplikacji i us³ug.
-- appsettings.json — ustawienia aplikacji, w tym connection string.
-- CdStore/Services/ApplicationDbContext.cs — DbContext aplikacji i konfiguracja encji.
-- CdStore/Services/SeedService.cs — serwis do seedowania danych pocz¹tkowych.
-- CdStore/Models — modele domenowe, najwa¿niejsze pliki:
-  - Users.cs — rozszerzenie IdentityUser (FullName, IsBlocked, DeliveryAddress).
-  - Album.cs, Kategoria.cs — encje produktów i kategorii.
-  - CartItem.cs, Order.cs, OrderItem.cs, Receipt.cs, Favorite.cs — encje koszyka/zamówieñ/paragonów/ulubionych.
-  - OrderStatus.cs — statusy zamówieñ.
-- CdStore/Controllers — kontrolery MVC:
-  - AccountController.cs — logowanie, rejestracja, profil, zmiana has³a, lista u¿ytkowników itp.
-  - HomeController.cs — strony g³ówne, przegl¹d, szczegó³y, koszyk.
-  - OrderController.cs — obs³uga procesu zamówienia i widoków zamówieñ.
-- CdStore/Views — widoki Razor dla akcji kontrolerów (layout, partials, widoki akcji).
-- CdStore/Services/CartService.cs — logika koszyka przechowywana po stronie serwisu.
-- CdStore/Migrations — wygenerowane migracje EF.
+- Program.cs â€” konfiguracja aplikacji i usÅ‚ug.
+- appsettings.json â€” ustawienia aplikacji, w tym connection string.
+- CdStore/Services/ApplicationDbContext.cs â€” DbContext aplikacji i konfiguracja encji.
+- CdStore/Services/SeedService.cs â€” serwis do seedowania danych poczÄ…tkowych.
+- CdStore/Models â€” modele domenowe, najwaÅ¼niejsze pliki:
+  - Users.cs â€” rozszerzenie IdentityUser (FullName, IsBlocked, DeliveryAddress).
+  - Album.cs, Kategoria.cs â€” encje produktÃ³w i kategorii.
+  - CartItem.cs, Order.cs, OrderItem.cs, Receipt.cs, Favorite.cs â€” encje koszyka/zamÃ³wieÅ„/paragonÃ³w/ulubionych.
+  - OrderStatus.cs â€” statusy zamÃ³wieÅ„.
+- CdStore/Controllers â€” kontrolery MVC:
+  - AccountController.cs â€” logowanie, rejestracja, profil, zmiana hasÅ‚a, lista uÅ¼ytkownikÃ³w itp.
+  - HomeController.cs â€” strony gÅ‚Ã³wne, przeglÄ…d, szczegÃ³Å‚y, koszyk.
+  - OrderController.cs â€” obsÅ‚uga procesu zamÃ³wienia i widokÃ³w zamÃ³wieÅ„.
+- CdStore/Views â€” widoki Razor dla akcji kontrolerÃ³w (layout, partials, widoki akcji).
+- CdStore/Services/CartService.cs â€” logika koszyka przechowywana po stronie serwisu.
+- CdStore/Migrations â€” wygenerowane migracje EF.
 
-G³ówne funkcjonalnoœci
+<h3>GÅ‚Ã³wne funkcjonalnoÅ›ci</h3>
 
-- Rejestracja i logowanie u¿ytkowników (ASP.NET Core Identity). Model Users rozszerza IdentityUser o pola FullName, IsBlocked (blokowanie u¿ytkownika) oraz DeliveryAddress.
-- Przegl¹danie katalogu albumów i kategorii.
-- Dodawanie produktów do koszyka oraz zarz¹dzanie koszykiem (CartService).
-- Tworzenie zamówieñ, przegl¹danie historii zamówieñ i generowanie paragonów/receipt.
-- Ulubione (Favorite) dla u¿ytkowników.
-- Seedowanie przyk³adowych danych (SeedService) i migracje EF do tworzenia schematu bazy.
+- Rejestracja i logowanie uÅ¼ytkownikÃ³w (ASP.NET Core Identity). Model Users rozszerza IdentityUser o pola FullName, IsBlocked (blokowanie uÅ¼ytkownika) oraz DeliveryAddress.
+- PrzeglÄ…danie katalogu albumÃ³w i kategorii.
+- Dodawanie produktÃ³w do koszyka oraz zarzÄ…dzanie koszykiem (CartService).
+- Tworzenie zamÃ³wieÅ„, przeglÄ…danie historii zamÃ³wieÅ„ i generowanie paragonÃ³w/receipt.
+- Ulubione (Favorite) dla uÅ¼ytkownikÃ³w.
+- Seedowanie przykÅ‚adowych danych (SeedService) i migracje EF do tworzenia schematu bazy.
 
-Przyk³ady kodu — jak to dzia³a (fragmenty)
+<h2>PrzykÅ‚ady kodu â€” jak to dziaÅ‚a (fragmenty)</h2>
 
-1) Program.cs — rejestracja DbContext i Identity
+<h3>1) Program.cs â€” rejestracja DbContext i Identity</h3>
 
 ```csharp
 // ...typowy fragment z Program.cs
@@ -49,17 +49,17 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddIdentity<Users, IdentityRole>(options =>
 {
-    // opcje has³a, lockout itp.
+    // opcje hasÅ‚a, lockout itp.
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders();
 
-// rejestracja serwisów aplikacyjnych
+// rejestracja serwisÃ³w aplikacyjnych
 builder.Services.AddScoped<CartService>();
 builder.Services.AddScoped<SeedService>();
 ```
 
-2) ApplicationDbContext (wa¿ne mapowania i DbSety)
+<h3>2) ApplicationDbContext (waÅ¼ne mapowania i DbSety)</h3>
 
 ```csharp
 public class ApplicationDbContext : IdentityDbContext<Users>
@@ -82,7 +82,7 @@ public class ApplicationDbContext : IdentityDbContext<Users>
 }
 ```
 
-3) Model Users (rozszerzony IdentityUser)
+<h3>3) Model Users (rozszerzony IdentityUser)</h3>
 
 ```csharp
 public class Users : IdentityUser
@@ -97,7 +97,7 @@ public class Users : IdentityUser
 }
 ```
 
-4) Przyk³ad u¿ycia CartService w kontrolerze/home
+<h3>4) PrzykÅ‚ad uÅ¼ycia CartService w kontrolerze/home</h3>
 
 ```csharp
 public class HomeController : Controller
@@ -117,7 +117,7 @@ public class HomeController : Controller
 }
 ```
 
-5) Tworzenie zamówienia (schematycznie)
+<h3>5) Tworzenie zamÃ³wienia (schematycznie)</h3>
 
 ```csharp
 // OrderController
@@ -128,7 +128,7 @@ _context.Orders.Add(order);
 await _context.SaveChangesAsync();
 ```
 
-Konfiguracja bazy danych — przyk³adowy connection string (appsettings.json)
+<h3>6)Konfiguracja bazy danych â€” przykÅ‚adowy connection string (appsettings.json)</h3>
 
 ```json
 {
@@ -138,53 +138,46 @@ Konfiguracja bazy danych — przyk³adowy connection string (appsettings.json)
 }
 ```
 
-Jak po³¹czyæ projekt w Visual Studio z Microsoft SQL Server Express
+<h2>Jak poÅ‚Ä…czyÄ‡ projekt w Visual Studio z Microsoft SQL Server Express</h2>
 
-1. Upewnij siê, ¿e SQL Server Express jest zainstalowany i dzia³a. Domyœlny instance czêsto to .\SQLEXPRESS lub (localdb)\MSSQLLocalDB.
-2. W Visual Studio otwórz menu View -> SQL Server Object Explorer.
-3. Kliknij prawym przyciskiem "SQL Server" -> Add SQL Server. Zaloguj siê u¿ywaj¹c Windows Authentication lub SQL Server Authentication.
-4. Po dodaniu instancji rozwiñ serwer, kliknij prawym na "Databases" -> Add New Database i wpisz np. CdStoreDb.
-5. W pliku appsettings.json ustaw connection string (jak wy¿ej), u¿ywaj¹c Server=.\SQLEXPRESS dla Express lub (localdb)\\MSSQLLocalDB dla LocalDB.
+1. Upewnij siÄ™, Å¼e SQL Server Express jest zainstalowany i dziaÅ‚a. DomyÅ›lny instance czÄ™sto to .\SQLEXPRESS lub (localdb)\MSSQLLocalDB.
+2. W Visual Studio otwÃ³rz menu View -> SQL Server Object Explorer.
+3. Kliknij prawym przyciskiem "SQL Server" -> Add SQL Server. Zaloguj siÄ™ uÅ¼ywajÄ…c Windows Authentication lub SQL Server Authentication.
+4. Po dodaniu instancji rozwiÅ„ serwer, kliknij prawym na "Databases" -> Add New Database i wpisz np. CdStoreDb.
+5. W pliku appsettings.json ustaw connection string (jak wyÅ¼ej), uÅ¼ywajÄ…c Server=.\SQLEXPRESS dla Express lub (localdb)\\MSSQLLocalDB dla LocalDB.
 6. W konsoli Package Manager Console (Visual Studio) lub w terminalu wykonaj migracje:
    - dotnet ef migrations add InitialCreate
    - dotnet ef database update
 
-Uwaga: Jeœli u¿ywasz Windows Authentication (Trusted_Connection=True) upewnij siê, ¿e konto uruchamiaj¹ce aplikacjê ma uprawnienia do bazy.
+<strong>Uwaga: JeÅ›li uÅ¼ywasz Windows Authentication (Trusted_Connection=True) upewnij siÄ™, Å¼e konto uruchamiajÄ…ce aplikacjÄ™ ma uprawnienia do bazy.</strong>
 
-Szybkie kroki — synchronizacja projektu z SQL Server w praktyce
+<h3>Szybkie kroki â€” synchronizacja projektu z SQL Server w praktyce</h3>
 
 - Skonfiguruj connection string w appsettings.json.
-- Uruchom Visual Studio -> SQL Server Object Explorer aby zobaczyæ bazê.
+- Uruchom Visual Studio -> SQL Server Object Explorer aby zobaczyÄ‡ bazÄ™.
 - Wykonaj migracje (Package Manager Console lub dotnet CLI).
-- Uruchom aplikacjê i sprawdŸ, czy tabele siê pojawi³y.
+- Uruchom aplikacjÄ™ i sprawdÅº, czy tabele siÄ™ pojawiÅ‚y.
 
-Migracje i przydatne komendy
+<h3>Migracje i przydatne komendy</h3>
 
-- Dodaj migracjê: dotnet ef migrations add NazwaMigracji
+- Dodaj migracjÄ™: dotnet ef migrations add NazwaMigracji
 - Zastosuj migracje: dotnet ef database update
-- Usuñ ostatni¹ migracjê (jeœli nie zosta³a zastosowana): dotnet ef migrations remove
+- UsuÅ„ ostatniÄ… migracjÄ™ (jeÅ›li nie zostaÅ‚a zastosowana): dotnet ef migrations remove
 
-Seedowanie danych
+<h3>Seedowanie danych</h3>
 
-Projekt zawiera SeedService, który podczas uruchomienia (jeœli skonfigurowany w Program.cs) tworzy konta, przyk³adowe kategorie i albumy. Jeœli chcesz dodaæ w³asne dane, zmodyfikuj SeedService lub uruchom narzêdzie Seed rêcznie z poziomu aplikacji.
+Projekt zawiera SeedService, ktÃ³ry podczas uruchomienia (jeÅ›li skonfigurowany w Program.cs) tworzy konta, przykÅ‚adowe kategorie i albumy. JeÅ›li chcesz dodaÄ‡ wÅ‚asne dane, zmodyfikuj SeedService lub uruchom narzÄ™dzie Seed rÄ™cznie z poziomu aplikacji.
 
-Bezpieczeñstwo i uwagi
+<h2>BezpieczeÅ„stwo i uwagi</h2>
 
-- Pole IsBlocked w modelu Users pozwala blokowaæ dostêp u¿ytkownikom — sprawdŸ kontrolery logiki autoryzacji, ¿eby respektowa³y tê flagê.
-- Nie przechowuj w repozytorium prawdziwych credentiali. W œrodowisku produkcyjnym u¿yj Secret Manager lub zmiennych œrodowiskowych.
+- Pole IsBlocked w modelu Users pozwala blokowaÄ‡ dostÄ™p uÅ¼ytkownikom â€” sprawdÅº kontrolery logiki autoryzacji, Å¼eby respektowaÅ‚y tÄ™ flagÄ™.
+- Nie przechowuj w repozytorium prawdziwych credentiali. W Å›rodowisku produkcyjnym uÅ¼yj Secret Manager lub zmiennych Å›rodowiskowych.
 
-Dalsze kierunki rozwoju
+<h2>Kontakt i rozwÃ³j</h2>
 
-- Panel administracyjny do zarz¹dzania produktami, kategoriami i zamówieniami.
-- Integracja p³atnoœci (np. Stripe, PayU).
-- Obs³uga zdjêæ produktów (przechowywanie w chmurze lub folderze wwwroot).
-- Testy jednostkowe i integracyjne dla serwisów i kontrolerów.
+Projekt znajduje siÄ™ w repozytorium: https://github.com/Kszaczuch/CdStore (remote origin). Wszelkie zmiany zgÅ‚aszaÄ‡ przez pull requesty; do dyskusji uÅ¼ywaÄ‡ issues w repozytorium.
 
-Kontakt i rozwój
-
-Projekt znajduje siê w repozytorium: https://github.com/Kszaczuch/CdStore (remote origin). Wszelkie zmiany zg³aszaæ przez pull requesty; do dyskusji u¿ywaæ issues w repozytorium.
-
-Lista najwa¿niejszych plików do szybkiego przegl¹du
+<h2>Lista najwaÅ¼niejszych plikÃ³w do szybkiego przeglÄ…du</h2>
 
 - Program.cs
 - Services/ApplicationDbContext.cs
@@ -194,6 +187,4 @@ Lista najwa¿niejszych plików do szybkiego przegl¹du
 - Controllers/HomeController.cs
 - Controllers/OrderController.cs
 - Models/Users.cs, Album.cs, Order.cs, OrderItem.cs
-- Views/* (szczególnie Views/Account i Views/Order)
-
-Koniec dokumentacji
+- Views/* (szczegÃ³lnie Views/Account i Views/Order)
