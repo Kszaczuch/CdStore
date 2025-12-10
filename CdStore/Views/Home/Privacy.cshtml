@@ -1,4 +1,5 @@
-﻿@model List<CdStore.Models.Album>
+﻿@using Microsoft.AspNetCore.Mvc.Rendering
+@model List<CdStore.Models.Album>
 @{
     ViewData["Title"] = "Zarządzanie produktów";
     var sel = ViewBag.SelectedAlbum as CdStore.Models.Album;
@@ -25,12 +26,8 @@
 
             <div class="col-md-2">
                 <label class="form-label visually-hidden">Gatunek</label>
-                <select name="KategoriaId" class="form-select bg-dark text-white">
+                <select name="KategoriaId" class="form-select bg-dark text-white" asp-items="@(new SelectList(categories, "Id", "Nazwa", sel?.KategoriaId))">
                     <option value="">- brak -</option>
-                    @foreach (var c in categories)
-                    {
-                        <option value="@c.Id">@c.Nazwa</option>
-                    }
                 </select>
             </div>
 

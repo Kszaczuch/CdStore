@@ -170,8 +170,16 @@ namespace CdStore.Controllers
                 return Json(new { success = false, msg = "Konto właściciela zamówienia jest zablokowane. Płatność niemożliwa." });
             }
 
-
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (order.UserId != currentUserId)
+            {
+                if (User.IsInRole("Admin"))
+                    return Json(new { success = false, msg = "Administrator nie może opłacać cudzych zamówień." });
+                else
+                    return Json(new { success = false, msg = "Nie masz dostępu do tego zamówienia." });
+            }
+
             if (!string.IsNullOrEmpty(currentUserId) && IsUserBlocked(currentUserId))
             {
                 return Json(new { success = false, msg = "Twoje konto jest zablokowane. Nie możesz dokonywać płatności." });
@@ -227,6 +235,16 @@ namespace CdStore.Controllers
             }
 
             order.Status = newStatus;
+
+            if (newStatus == OrderStatus.Dostarczone)
+            {
+                order.DeliveryDate = DateTime.UtcNow;
+            }
+            else
+            {
+                order.DeliveryDate = null;
+            }
+
             _context.SaveChanges();
 
             return RedirectToAction("AllOrders");

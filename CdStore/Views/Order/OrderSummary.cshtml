@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Podsumowanie zamówienia";
 }
+@using System.Security.Claims
 
 <h2 class="text-center">Podsumowanie zamówienia</h2>
 
@@ -35,18 +36,45 @@
     </tr>
 </table>
 
+@{
+    var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    var isAdmin = User.IsInRole("Admin");
+    var isOwner = Model.UserId == currentUserId;
+}
+
 @if (!Model.IsPaid)
 {
-    <button id="pay-btn" class="btn btn-success">Opłać zamówienie</button>
+    if (isOwner)
+    {
+        <button id="pay-btn" class="btn btn-success">Opłać zamówienie</button>
+    }
+    else if (isAdmin && !isOwner)
+    {
+        <a asp-controller="Order" asp-action="AllOrders" class="btn btn-secondary">Powrót do listy zamówień</a>
+    }
+    else
+    {
+        <p class="text-danger">Nie masz dostępu do tego zamówienia.</p>
+    }
 }
 else
 {
     <a asp-controller="Home" asp-action="Index" class="btn btn-secondary mt-3">
         Powrót do strony głównej
     </a>
-    <a asp-controller="Account" asp-action="Orders" class="btn btn-info mt-3">
-        Widok zamówień
-    </a>
+
+    @if (isAdmin)
+    {
+        <a asp-controller="Order" asp-action="AllOrders" class="btn btn-info mt-3">
+            Lista zamówień
+        </a>
+    }
+    else
+    {
+        <a asp-controller="Account" asp-action="Orders" class="btn btn-info mt-3">
+            Widok zamówień
+        </a>
+    }
 }
 
 @section Scripts {

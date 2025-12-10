@@ -5,7 +5,10 @@
 
 <h2 class="text-center">Formularz zamówienia</h2>
 
-<form asp-action="Checkout" method="post">
+<form asp-action="Checkout" method="post" novalidate>
+    @Html.AntiForgeryToken()
+
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
     <h4>Dane dostawy</h4>
 
@@ -13,25 +16,30 @@
         <div class="col-md-6">
             <label class="form-label small text-white-50">Imię</label>
             <input asp-for="FirstName" class="form-control bg-dark text-white" />
+            <span asp-validation-for="FirstName" class="text-danger"></span>
         </div>
         <div class="col-md-6">
             <label class="form-label small text-white-50">Nazwisko</label>
             <input asp-for="LastName" class="form-control bg-dark text-white" />
+            <span asp-validation-for="LastName" class="text-danger"></span>
         </div>
 
         <div class="col-12">
             <label class="form-label small text-white-50">Adres</label>
             <input asp-for="Address" class="form-control bg-dark text-white" />
+            <span asp-validation-for="Address" class="text-danger"></span>
         </div>
 
         <div class="col-md-6">
             <label class="form-label small text-white-50">Telefon</label>
             <input asp-for="Phone" class="form-control bg-dark text-white" />
+            <span asp-validation-for="Phone" class="text-danger"></span>
         </div>
 
         <div class="col-md-6">
             <label class="form-label small text-white-50">Email</label>
             <input asp-for="Email" class="form-control bg-dark text-white" />
+            <span asp-validation-for="Email" class="text-danger"></span>
         </div>
     </div>
 
@@ -56,5 +64,11 @@
         </tr>
     </table>
 
-    <button class="btn btn-outline-info">Złóż zamówienie</button>
+    <button type="submit" class="btn btn-outline-info">Złóż zamówienie</button>
 </form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial.cshtml");
+    }
+}
