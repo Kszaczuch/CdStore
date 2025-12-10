@@ -2,7 +2,7 @@
 
 <h2>Ogólny opis</h2>
 
-CdStore to prosty sklep internetowy z płytami CD zbudowany w ASP.NET Core Razor Pages / MVC (razor views) na platformie .NET 8. Projekt wykorzystuje Identity do obsługi użytkowników, Entity Framework Core do warstwy dostępu do danych oraz migracje EF do zarządzania schematem bazy danych. Zawiera mechanikę koszyka, zamówień, ulubionych, panel konta oraz proste zarządzanie użytkownikami.
+CdStore to prosty sklep internetowy z płytami CD zbudowany w ASP.NET Core Razor Pages / MVC (razor views) na platformie .NET 8. Projekt wykorzystuje Identity do obsługi użytkowników, Entity Framework Core do warstwy dostępu do danych oraz migracje EF do zarządzania schemą bazy danych. Zawiera mechanikę koszyka, zamówień, ulubionych, panel konta oraz proste zarządzanie użytkownikami.
 
 <h3>Wymagania</h3>
 
@@ -88,8 +88,6 @@ var app = builder.Build();
 await SeedService.SeedDatabase(app.Services);
 ```
 
-<p>Gdzie: Program.cs; uruchamia się przy starcie aplikacji — rejestruje wymagane serwisy i inicjuje seed danych.</p>
-
 <h3>2) ApplicationDbContext — rzeczywisty DbContext z projektu</h3>
 <p>Wyciąg z CdStore/Services/ApplicationDbContext.cs — definicje DbSetów używanych w aplikacji:</p>
 
@@ -114,8 +112,6 @@ public class ApplicationDbContext : IdentityDbContext<Users>
 }
 ```
 
-<p>Gdzie: ApplicationDbContext jest wstrzykiwany do kontrolerów i serwisów (np. OrderController, CartService) i odpowiada za dostęp do tabel w bazie.</p>
-
 <h3>3) Model Users — faktyczny model z projektu</h3>
 <p>Wyciąg z CdStore/Models/Users.cs — dodatkowe pola powiązane z użytkownikiem:</p>
 
@@ -134,8 +130,6 @@ public class Users : IdentityUser
     public string DeliveryAddress { get; set; }
 }
 ```
-
-<p>Gdzie: Model używany przez Identity i wszędzie tam, gdzie aplikacja potrzebuje dodatkowych informacji o użytkowniku (np. OrderController, AccountController).</p>
 
 <h3>4) CartService — fragmenty implementacji z projektu</h3>
 <p>Wyciąg z CdStore/Services/CartService.cs — pokazany jest rzeczywisty kod metody dodającej pozycję do koszyka:</p>
@@ -170,9 +164,7 @@ public bool Add(string cartId, int albumId, int quantity = 1)
 }
 ```
 
-<p>Gdzie: CartService jest wstrzykiwany do kontrolerów (np. HomeController, AccountController, OrderController) i obsługuje logikę koszyka.</p>
-
-<h3>5) Checkout i zapis zamówienia — rzeczywista logika z OrderController</h3>
+<h3>5) Checkout i zapis zamówienia — fragment z OrderController</h3>
 <p>Wyciąg z CdStore/Controllers/OrderController.cs — fragment POST Checkout, który tworzy Order i OrderItemy oraz aktualizuje stany magazynowe:</p>
 
 ```csharp
@@ -208,8 +200,6 @@ _context.SaveChanges();
 _cartService.Clear(cartId2);
 ```
 
-<p>Gdzie: Fragment znajduje się w OrderController i to on zapisuje zamówienie w bazie po przejściu przez stronę checkout.</p>
-
 <h3>6) Opłacenie zamówienia i generowanie paragonu (PDF)</h3>
 <p>Wyciąg z OrderController — metoda Pay oznacza zamówienie jako opłacone, tworzy Receipt, a DownloadReceipt generuje PDF przy użyciu QuestPDF:</p>
 
@@ -234,8 +224,6 @@ var pdfBytes = doc.GeneratePdf();
 var fileName = $"Paragon_{receipt.Number}.pdf";
 return File(pdfBytes, "application/pdf", fileName);
 ```
-
-<p>Gdzie: Endpoint Pay i DownloadReceipt w OrderController obsługują płatność i pobranie paragonu.</p>
 
 <h3>7) Connection string — aktualny w projekcie (appsettings.json)</h3>
 
@@ -333,7 +321,7 @@ return File(pdfBytes, "application/pdf", fileName);
 <p><img src="wwwroot/img/screenshots/Login.png" alt="Formularz logowania" /></p>
 
 <h3>Zmiana danych osobowych</h3>
-<p>Pozwala użytkownikowi zaktualizować swoje dane (Imię i nazwisko, adres dostawy, numer telefonu).</p> <br>
+<p>Pozwala użytkownikowi zaktualizować swoje dane (Imię i nazwisko, adres dostawy, numer telefonu).</p> 
 <p>Aby przejść do profilu należy rozwinąć listę w prawym górnym rogu ekranu i wcisnąć przycisk "Profil".</p>
 <p><img src="wwwroot/img/screenshots/Strona-glowna-profil.png" alt="Profil na stronie głównej" /></p>
 <p>Wyświetli się formularz, w którym można zmienić dane osobowe oraz opcja zmiany hasła.</p>
