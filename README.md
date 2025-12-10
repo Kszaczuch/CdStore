@@ -47,7 +47,7 @@ Hasło: Haslo123
 
 - Zaloguj się jako admin.
 
-- Przejdź do panelu zarządzania, najpierw do zakładki "Gatunki" żeby dodać gatunki muzyczne, a następnie do zakładki "Albumy" w której będziesz mógł dodać klika płyt.
+- Przejdź do panelu zarządzania, najpierw do zakładki "Gatunki" żeby zobaczyć jakie są dodane i ewentualnie dodać gatunki muzyczne, a następnie do zakładki "Albumy" w której będziesz mógł dodać klika płyt.
 
 - Wyloguj się.
 
