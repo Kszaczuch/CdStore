@@ -247,57 +247,103 @@ return File(pdfBytes, "application/pdf", fileName);
 
 <p>Gdzie: appsettings.json — connection string jest odczytywany w Program.cs i przekazywany do DbContext.</p>
 
-<h2>Operacje użytkownika i administratora — krok po kroku (bez kodu)</h2>
+<h2>Operacje użytkownika — krok po kroku (bez kodu)</h2>
 
-<p>W tej sekcji znajdują się opisy kroków, jakie wykonuje użytkownik lub administrator w aplikacji. Nie ma tu fragmentów kodu — tylko instrukcje operacyjne i miejsca, gdzie warto dodać zrzuty ekranu.</p>
+<p>W tej sekcji znajdują się opisy kroków, jakie wykonuje użytkownik w aplikacji. Nie ma tu fragmentów kodu — tylko instrukcje operacyjne.</p>
 
 <h3>Rejestracja konta</h3>
-<p>Co robi: Tworzy nowe konto użytkownika. Wypełnij formularz rejestracji (Email, Hasło, Imię i nazwisko) i zatwierdź. Po rejestracji konto jest utworzone i użytkownik może się zalogować.</p>
-<p><img src="wwwroot/img/screenshots/register.png" alt="Formularz rejestracji" /></p>
+<p>Wypełnij formularz rejestracji (Email, Hasło, Imię i nazwisko) i zatwierdź. Po rejestracji konto jest utworzone i użytkownik może się zalogować.</p>
+<p><img src="wwwroot/img/screenshots/Rejestracja.png" alt="Formularz rejestracji" /></p>
 
 <h3>Logowanie</h3>
-<p>Co robi: Uwierzytelnia użytkownika. Wypełnij formularz logowania (Email, Hasło) i zatwierdź, aby uzyskać dostęp do konta i funkcji chronionych.</p>
-<p><img src="wwwroot/img/screenshots/login.png" alt="Formularz logowania" /></p>
+<p>Wypełnij formularz logowania (Email, Hasło) i zatwierdź, aby uzyskać dostęp do konta i funkcji chronionych.</p>
+<p><img src="wwwroot/img/screenshots/Login.png" alt="Formularz logowania" /></p>
 
 <h3>Zmiana danych osobowych</h3>
-<p>Co robi: Pozwala użytkownikowi zaktualizować swoje dane (FullName, DeliveryAddress, Phone). Przejdź do profilu i edytuj pola, a następnie zapisz zmiany.</p>
-<p><img src="wwwroot/img/screenshots/profile.png" alt="Formularz profilu" /></p>
+<p>Pozwala użytkownikowi zaktualizować swoje dane (Imię i nazwisko, adres dostawy, numer telefonu).</p> <br>
+<p>Aby przejść do profilu należy rozwinąć listę w prawym górnym rogu ekranu i wcisnąć przycisk "Profil".</p>
+<p><img src="wwwroot/img/screenshots/Strona-glowna-profil.png" alt="Profil na stronie głównej" /></p>
+<p>Wyświetli się formularz, w którym można zmienić dane osobowe oraz opcja zmiany hasła.</p>
+<p><img src="wwwroot/img/screenshots/Profil.png" alt="Formularz profilu" /></p>
 
-<h3>Przeglądanie katalogu</h3>
-<p>Co robi: Przeglądaj listę albumów, filtruj i sortuj według kategorii lub ceny. Kliknij album, aby zobaczyć szczegóły i okładkę.</p>
-<p><img src="wwwroot/img/screenshots/album-details.png" alt="Szczegóły albumu" /></p>
-
-<h3>Dodanie albumu do koszyka</h3>
-<p>Co robi: Dodaje wybrany album do koszyka. Użyj przycisku "Do koszyka" na karcie albumu lub na stronie szczegółów.</p>
-<p><img src="wwwroot/img/screenshots/add-to-cart.png" alt="Dodaj do koszyka" /></p>
+<h3>Strona główna</h3>
+<p>Strona główna, to strona z wszystkimi albumami, z jej poziomu można zobaczyć szczegóły danego albumu, filtrować wyniki, dodać album do koszyka oraz do ulubionych.</p>
+<p><img src="wwwroot/img/screenshots/Strona-glowna.png" alt="Strona główna" /></p>
+<p>Nad widokiem albumów znajdują się opcje filtrowani.a</p>
+<p><img src="wwwroot/img/screenshots/Strona-glowna-filtry.png" alt="Filtry na stronie głownej" /></p>
+<p>Aby zobaczyć szczegóły i okładkę albumu, należy kliknąć w dowolne miejsce na jego karcie produktu.</p>
+<p><img src="wwwroot/img/screenshots/Detale.png" alt="Szczegóły albumu" /></p>
+<p>Aby dodać album do koszyka, kliknij w przycisk "Do koszyka", a aby wyświetlić koszyk, kliknij w ikonkę koszyka w prawym górnym rogu ekranu.</p>
+<p><img src="wwwroot/img/screenshots/Strona-glowna-koszyk.png" alt="Dodawanie do koszyka na stronie głównej" /></p>
+<p>Widok koszyka</p>
+<p><img src="wwwroot/img/screenshots/Koszyk.png" alt="Widok koszyka" /></p>
+<p>Aby dodać album do ulubionych, kliknij w ikonę serduszka obok albumu. Aby wyświetlić ulubione, rozwiń listę w prawym górnym rogu ekranu i kliknij w napis "Ulubione".</p>
+<p><img src="wwwroot/img/screenshots/Strona-glowna-ulubione.png" alt="Dodawanie do ulubionych na stronie głównej" /></p>
+<p>Widok ulubioncyh</p>
+<p><img src="wwwroot/img/screenshots/Ulubione.png" alt="Widok ulubionych" /></p>
 
 <h3>Zarządzanie koszykiem</h3>
-<p>Co robi: Pokazuje zawartość koszyka, pozwala zmienić ilości i usuwać pozycje. Przejdź do widoku Koszyk, aby zaktualizować zawartość przed checkout.</p>
-<p><img src="wwwroot/img/screenshots/cart.png" alt="Widok koszyka" /></p>
+<p>W widoku koszyka dla użytkownika jest dostępnych kilka akcji</p> <br>
+<p>Pierwsza z nich to zmiana ilości kupowanego produktu. Aby to zrobić należy użyć strzałek obok ilości wybranego produktu</p>
+<p><img src="wwwroot/img/screenshots/Koszyk-ilosc.png" alt="Zmiana ilości" /></p>
+<p>Użytkownik może też usunąć przedmiot z koszyka klikając czerwony przycisk "Usuń" po prawej stronie koszyka, lub przycisk "Usuń wszystko" pod produktami by wyczyścić cały koszyk.</p> <br>
+<p>Ostatnią akcją jaką może wykonać użytkownik jest przejście do podsumowania zamówienia. Aby to zrobić należy kliknąć niebieski przycisk "Przejdź do zamówienia" pod produktami</p>
+<p><img src="wwwroot/img/screenshots/Koszyk-zamow.png" alt="Przechodzenie do zamówienia" /></p>
 
-<h3>Checkout / Złożenie zamówienia</h3>
-<p>Co robi: Wprowadź dane dostawy i zatwierdź zamówienie. System tworzy zamówienie (Order) i pozycje (OrderItem), rezerwuje stany magazynowe i czyści koszyk.</p>
-<p><img src="wwwroot/img/screenshots/checkout.png" alt="Podsumowanie zamówienia" /></p>
+<h3>Złożenie zamówienia</h3>
+<p>Po przejściu do podsumowania zamówienia, użytkownik zobaczy formularz, w którym musi wypełnić swoje dane osobowe, jeśli jeszcze tego nie zrobił w profilu.</p>
+<p><img src="wwwroot/img/screenshots/Zamowienie.png" alt="Podsumowanie zamówienia" /></p>
+<p>Po wypełnieniu danych, należy kliknąć przycisk "Złóż zamówienie", by przejść dalej.</p>
+<p><img src="wwwroot/img/screenshots/Zamowienie-zloz.png" alt="Składanie zamówienia" /></p>
+<p>Po złożeniu zamówienia pojawia się opcja "Opłać zamówienie". Na potrzeby projektu funkcja ta tylko pyta czy opłacić zamówienie i nie jest wykonywana żadna transakcja.</p>
+<p><img src="wwwroot/img/screenshots/Oplacanie.png" alt="Opłacanie zamówienia" /></p>
+<p>Po potwierdzeniu płatności zamówienie jest oznaczane jako opłacone, a system generuje paragon, który można pobrać klikając przycisk "Pobierz paragon".</p>
+<p><img src="wwwroot/img/screenshots/Paragon.png" alt="Pobieranie paragonu" /></p>
+<p>Tak wygląda przykładowy paragon, jest to plik pdf.</p>
+<p><img src="wwwroot/img/screenshots/Paragon-pdf.png" alt="Przykładowy paragon" /></p>
+<p>Po złożeniu zamówienia można zawsze przejść do widoku wszystkich swoich zamówień, poprzez rozwinięcie listy w prawym górnym rogu ekranu i kliknięcie przycisku "Zamówienia"</p>
+<p><img src="wwwroot/img/screenshots/Strona-glowna-zamowienia.png" alt="Panel zamówień na stronie głównej" /></p>
+<p>W panelu zamówień można zobaczyć szczegóły danego zakupu klikając w jego id, zobaczyć jego status, cenę, datę zamówienia oraz datę dostarczenia</p>
+<p><img src="wwwroot/img/screenshots/Zamowienia.png" alt="Panel zamówień" /></p>
 
-<h3>Opłacenie zamówienia</h3>
-<p>Co robi: Po potwierdzeniu płatności zamówienie jest oznaczane jako opłacone, a system generuje paragon (Receipt). Integracja z bramką płatności wymaga konfiguracji zewnętrznej.</p>
-<p><img src="wwwroot/img/screenshots/payment.png" alt="Proces płatności" /></p>
+<h2>Operacje administratora — krok po kroku (bez kodu)</h2>
 
-<h3>Pobranie paragonu</h3>
-<p>Co robi: Umożliwia pobranie paragonu w formacie PDF z widoku szczegółów zamówienia. Kliknij "Pobierz paragon" i otrzymasz plik PDF generowany przez QuestPDF.</p>
-<p><img src="wwwroot/img/screenshots/receipt.png" alt="Pobierz paragon" /></p>
+<p>W tej sekcji znajdują się opisy kroków, jakie wykonuje administrator w aplikacji. Nie ma tu fragmentów kodu — tylko instrukcje operacyjne.</p>
 
-<h3>Dodawanie / edycja albumu i gatunku (Admin)</h3>
-<p>Co robi: W panelu administracyjnym możesz dodać nowy album lub gatunek (kategorie) oraz edytować istniejące wpisy. Formularze admina umożliwiają ustawienie tytułu, artysty, ceny, ilości na stanie i linku do okładki.</p>
-<p><img src="wwwroot/img/screenshots/admin-albums.png" alt="Panel admin - albumy" /></p>
+<h3>Dodawanie / edycja albumu</h3>
+<p>W panelu administracyjnym możesz dodać nowy album oraz edytować istniejące wpisy. Formularze admina umożliwiają ustawienie tytułu, artysty, ceny, gatunku, opisu, ilości na stanie i linku do okładki.</p>
+<p>Aby przejść do panelu albumów należy rozwinąć listę w lewym górnym rogu ekranu i kliknąć przycisk "Albumy"</p>
+<p><img src="wwwroot/img/screenshots/Strona-glowna-admin-albumy.png" alt="Panel zarządzania albumami na stronie głównej" /></p>
+<p>Widok albumów</p>
+<p><img src="wwwroot/img/screenshots/Albumy.png" alt="Panel admin - albumy" /></p>
+<p>Aby dodać nowy album, należy użyć formularza na górze strony</p>
+<p><img src="wwwroot/img/screenshots/Albumy-dodawanie.png" alt="Dodawanie albumów" /></p>
+<p>Aby edytować bądź usunąć album, należy użyć jednego z dwóch przycisków po prawej stronie tabeli</p>
+<p><img src="wwwroot/img/screenshots/Albumy-akcje.png" alt="Edycja i usuwanie albumów" /></p>
 
-<h3>Blokowanie / odblokowywanie użytkownika (Admin)</h3>
-<p>Co robi: Na liście użytkowników możesz zablokować konto, ustawiając flagę IsBlocked; zablokowany użytkownik nie może składać zamówień ani wykonywać płatności. Możesz również przywrócić konto ustawiając IsBlocked = false.</p>
-<p><img src="wwwroot/img/screenshots/admin-users.png" alt="Panel admin - użytkownicy" /></p>
+<h3>Dodawanie / edycja gatunku</h3>
+<p>W panelu administracyjnym możesz dodać nowy gatunek oraz edytować istniejące wpisy.</p>
+<p>Aby przejść do panelu gatunków należy rozwinąć listę w lewym górnym rogu ekranu i kliknąć przycisk "Gatunki"</p>
+<p><img src="wwwroot/img/screenshots/Strona-glowna-admin-gatunki.png" alt="Panel zarządzania gatunkami na stronie głównej" /></p>
+<p>Widok gatunków</p>
+<p><img src="wwwroot/img/screenshots/Gatunki.png" alt="Panel admin - gatunki" /></p>
+<p>Aby dodać nowy gatunek, należy użyć formularza na górze strony</p>
+<p>Aby edytować bądź usunąć gatunek, należy użyć jednego z dwóch przycisków po prawej stronie tabeli</p>
 
-<h3>Zarządzanie zamówieniami (Admin)</h3>
-<p>Co robi: Panel administracyjny pokazuje wszystkie zamówienia; możesz filtrować po statusie i zmieniać statusy (np. oczekujące, wysłane, dostarczone). Możesz też pobierać paragon klienta lub generować notatki wysyłkowe.</p>
+<h3>Blokowanie / odblokowywanie użytkownika</h3>
+<p>Na liście użytkowników admini mogą zablokować konto. Zablokowany użytkownik nie może składać zamówień ani wykonywać płatności. Można również przywrócić zablokowane konto, mianować użytkownika adminem oraz odebrać mu uprawnienia admina.</p>
+<p>Aby przejść do panelu użytkowników należy rozwinąć listę w lewym górnym rogu ekranu i kliknąć przycisk "Użytkownicy"</p>
+<p><img src="wwwroot/img/screenshots/Strona-glowna-admin-uzytkownicy.png" alt="Panel zarządzania użytkownikami na stronie głównej" /></p>
+<p>Aby zablokować, odblokować, mianować adminem lub usunąć upeawnienia admina należy użyć akcji na prawo od użytkownika.</p>
+<p><img src="wwwroot/img/screenshots/Uzytkownicy-akcje.png" alt="Akcje na użytkownikach" /></p>
+
+<h3>Zarządzanie zamówieniami</h3>
+<p>Ten panel administracyjny pokazuje wszystkie zamówienia; można filtrować po statusie i zmieniać statusy (np. oczekujące, wysłane, dostarczone). Można też zobaczyć szczegóły zamówienia klienta gdzie jets możliwość pobrania paragonu.</p>
 <p><img src="wwwroot/img/screenshots/admin-orders.png" alt="Panel admin - zamówienia" /></p>
+<p>Aby przejść do panelu zamówień należy rozwinąć listę w lewym górnym rogu ekranu i kliknąć przycisk "Zamówienia"</p>
+<p><img src="wwwroot/img/screenshots/Strona-glowna-admin-zamowienia.png" alt="Panel zarządzania zamówieniami na stronie głównej" /></p>
+<p>Aby zmienić status zamówienia należy wybrać jedną z opcji w liście rozwijanej po prawej stronie tabeli</p>
+<p><img src="wwwroot/img/screenshots/Zamowienia-admin-status.png" alt="Zmiana statusu zamówienia" /></p>
 
 <h2>Uwagi końcowe</h2>
 
